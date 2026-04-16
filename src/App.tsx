@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import PublicLayout from '@/layouts/PublicLayout';
 import AdminLayout from '@/layouts/AdminLayout';
 import Home from '@/pages/public/Home';
@@ -13,6 +14,8 @@ import MessagesTab from '@/pages/admin/MessagesTab';
 
 export default function App() {
     return (
+        <>
+        <Toaster position="bottom-right" theme="dark" richColors />
         <BrowserRouter>
             <Routes>
                 {/* Public routes */}
@@ -37,5 +40,6 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </BrowserRouter>
+        </>
     );
 }
