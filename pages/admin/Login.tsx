@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import ThemedInput from '@/components/admin/ThemedInput';
@@ -10,6 +10,15 @@ export default function AdminLogin() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        fetch('/api/auth/check', { credentials: 'include' })
+            .then(r => r.json())
+            .then((data: { authenticated: boolean }) => {
+                if (data.authenticated) navigate('/admin', { replace: true });
+            })
+            .catch(() => {});
+    }, [navigate]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
