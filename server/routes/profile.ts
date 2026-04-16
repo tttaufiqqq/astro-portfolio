@@ -54,6 +54,21 @@ router.put('/', requireAuth, async (req, res) => {
     }
 });
 
+// DELETE /api/profile/resume — protected
+router.delete('/resume', requireAuth, async (_req, res) => {
+    try {
+        const profile = await prisma.profile.findFirst();
+        if (profile?.resumeUrl) {
+            await deleteFromBlob(profile.resumeUrl);
+            await prisma.profile.update({ where: { id: profile.id }, data: { resumeUrl: null } });
+        }
+        res.json({ ok: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to remove resume' });
+    }
+});
+
 // DELETE /api/profile/avatar — protected
 router.delete('/avatar', requireAuth, async (_req, res) => {
     try {

@@ -57,6 +57,17 @@ export default function ProfileTab() {
         return url;
     }
 
+    async function removeResume() {
+        try {
+            const res = await fetch('/api/profile/resume', { method: 'DELETE', credentials: 'include' });
+            if (!res.ok) throw new Error();
+            setResumeUrl(null);
+            toast.success('Resume removed');
+        } catch {
+            toast.error('Failed to remove resume');
+        }
+    }
+
     async function removeAvatar() {
         try {
             const res = await fetch('/api/profile/avatar', { method: 'DELETE', credentials: 'include' });
@@ -189,15 +200,21 @@ export default function ProfileTab() {
                             View current resume
                         </a>
                     )}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <input ref={resumeInputRef} type="file" accept="application/pdf" className="hidden" onChange={handleResumeChange} />
                         <button type="button" disabled={uploadingResume} onClick={() => resumeInputRef.current?.click()}
                             className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
                             {uploadingResume ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                             {uploadingResume ? 'Uploading…' : resumeUrl ? 'Replace resume' : 'Upload resume'}
                         </button>
-                        <span className="text-xs text-slate-600">PDF only — max 5MB</span>
+                        {resumeUrl && (
+                            <button type="button" onClick={removeResume}
+                                className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-red-400 hover:border-red-400/40 transition-colors">
+                                <X size={14} /> Remove
+                            </button>
+                        )}
                     </div>
+                    <p className="text-xs text-slate-600">PDF only — max 5MB</p>
                 </div>
 
                 <div className="space-y-3">

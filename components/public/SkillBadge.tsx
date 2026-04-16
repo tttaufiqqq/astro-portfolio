@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { resolveIcon } from '@/lib/icon-map';
+import type { SkillIcon } from '@/lib/icon-map';
 import type { Skill } from '@/types/models';
 
 interface Props {
@@ -17,7 +18,7 @@ function isEmoji(icon: string): boolean {
 
 export default function SkillBadge({ skill }: Props) {
     const iconIsEmoji = skill.icon ? isEmoji(skill.icon) : false;
-    const Icon = iconIsEmoji ? null : resolveIcon(skill.icon);
+    const Icon: SkillIcon | null = iconIsEmoji ? null : resolveIcon(skill.icon);
 
     return (
         <motion.div

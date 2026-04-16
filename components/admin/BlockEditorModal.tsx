@@ -192,11 +192,19 @@ function BlockForm({ type, form, onChange }: { type: BlockType; form: AnyForm; o
                                 </div>
                             )}
                             <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                            <button type="button" disabled={uploading} onClick={() => imageInputRef.current?.click()}
-                                className="flex items-center gap-2 px-3 py-1.5 text-xs border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
-                                {uploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
-                                {uploading ? 'Uploading…' : f.imageUrl ? 'Replace image' : 'Upload image'}
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button type="button" disabled={uploading} onClick={() => imageInputRef.current?.click()}
+                                    className="flex items-center gap-2 px-3 py-1.5 text-xs border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                                    {uploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                                    {uploading ? 'Uploading…' : f.imageUrl ? 'Replace image' : 'Upload image'}
+                                </button>
+                                {f.imageUrl && (
+                                    <button type="button" onClick={() => set('imageUrl', '')}
+                                        className="flex items-center gap-2 px-3 py-1.5 text-xs border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-red-400 hover:border-red-400/40 transition-colors">
+                                        <X size={12} /> Remove
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </FormField>
                     <FormField label="Alt text">

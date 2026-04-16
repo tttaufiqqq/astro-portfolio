@@ -160,11 +160,19 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
                             </div>
                         )}
                         <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                        <button type="button" disabled={uploading} onClick={() => imageInputRef.current?.click()}
-                            className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
-                            {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                            {uploading ? 'Uploading…' : form.imageUrl ? 'Replace image' : 'Upload image'}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button type="button" disabled={uploading} onClick={() => imageInputRef.current?.click()}
+                                className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                                {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                                {uploading ? 'Uploading…' : form.imageUrl ? 'Replace image' : 'Upload image'}
+                            </button>
+                            {form.imageUrl && (
+                                <button type="button" onClick={() => set('imageUrl', '')}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-red-400 hover:border-red-400/40 transition-colors">
+                                    <X size={14} /> Remove
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </FormField>
 
