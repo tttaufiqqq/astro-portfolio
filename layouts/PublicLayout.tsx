@@ -1,7 +1,8 @@
 import { Link, Outlet } from 'react-router-dom';
 import { Github, Linkedin, Mail, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { Profile } from '@/types/models';
 
 const NAV_LINKS = [
     { label: 'About',    href: '/#about' },
@@ -9,14 +10,13 @@ const NAV_LINKS = [
     { label: 'Contact',  href: '/contact' },
 ];
 
-const SOCIAL = {
-    github:   'https://github.com/tttaufiqqq',
-    linkedin: 'https://linkedin.com/in/taufiq-muhammad-razif',
-    email:    'taufiq33992@gmail.com',
-};
-
 export default function PublicLayout() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [profile, setProfile] = useState<Profile | null>(null);
+
+    useEffect(() => {
+        fetch('/api/profile').then(r => r.json()).then(setProfile).catch(() => {});
+    }, []);
 
     return (
         <div className="min-h-screen bg-space-cadet text-slate-200 font-sans antialiased">
@@ -97,15 +97,21 @@ export default function PublicLayout() {
                     </div>
 
                     <div className="flex space-x-6">
-                        <motion.a whileHover={{ y: -3 }} href={SOCIAL.github} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="GitHub">
-                            <Github size={24} />
-                        </motion.a>
-                        <motion.a whileHover={{ y: -3 }} href={SOCIAL.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="LinkedIn">
-                            <Linkedin size={24} />
-                        </motion.a>
-                        <motion.a whileHover={{ y: -3 }} href={`mailto:${SOCIAL.email}`} className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="Email">
-                            <Mail size={24} />
-                        </motion.a>
+                        {profile?.githubUrl && (
+                            <motion.a whileHover={{ y: -3 }} href={profile.githubUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="GitHub">
+                                <Github size={24} />
+                            </motion.a>
+                        )}
+                        {profile?.linkedinUrl && (
+                            <motion.a whileHover={{ y: -3 }} href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="LinkedIn">
+                                <Linkedin size={24} />
+                            </motion.a>
+                        )}
+                        {profile?.twitterUrl && (
+                            <motion.a whileHover={{ y: -3 }} href={profile.twitterUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="Twitter / X">
+                                <X size={24} />
+                            </motion.a>
+                        )}
                     </div>
                 </div>
 
