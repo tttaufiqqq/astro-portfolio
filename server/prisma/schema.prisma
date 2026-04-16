@@ -8,35 +8,63 @@ datasource db {
 }
 
 model Project {
-  id          Int      @id @default(autoincrement())
-  title       String   @db.NVarChar(200)
-  description String   @db.NVarChar(Max)
-  techStack   String   @db.NVarChar(500)
-  githubUrl   String?  @db.NVarChar(500)
-  demoUrl     String?  @db.NVarChar(500)
-  imageUrl    String?  @db.NVarChar(500)
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  title         String         @db.NVarChar(200)
+  slug          String         @unique @db.NVarChar(200)
+  summary       String?        @db.NVarChar(500)
+  description   String         @db.NVarChar(Max)
+  techStack     String         @db.NVarChar(500)
+  githubUrl     String?        @db.NVarChar(500)
+  demoUrl       String?        @db.NVarChar(500)
+  imageUrl      String?        @db.NVarChar(500)
+  featured      Boolean        @default(false)
+  status        String         @default("published") @db.NVarChar(20)
+  order         Int            @default(0)
+  contentBlocks ContentBlock[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@map("projects")
 }
 
+model ContentBlock {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  type      String   @db.NVarChar(20)
+  order     Int      @default(0)
+  content   String   @db.NVarChar(Max)
+  language  String?  @db.NVarChar(50)
+  imageUrl  String?  @db.NVarChar(500)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("content_blocks")
+}
+
 model Skill {
-  id       Int    @id @default(autoincrement())
-  name     String @db.NVarChar(100)
-  category String @db.NVarChar(100)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.NVarChar(100)
+  category  String   @db.NVarChar(100)
+  icon      String?  @db.NVarChar(50)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("skills")
 }
 
 model Experience {
-  id          Int      @id @default(autoincrement())
-  company     String   @db.NVarChar(200)
-  role        String   @db.NVarChar(200)
+  id          Int       @id @default(autoincrement())
+  company     String    @db.NVarChar(200)
+  role        String    @db.NVarChar(200)
   startDate   DateTime
   endDate     DateTime?
-  description String   @db.NVarChar(Max)
+  description String    @db.NVarChar(Max)
+  current     Boolean   @default(false)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("experiences")
 }
