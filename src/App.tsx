@@ -11,6 +11,7 @@ import ProjectsTab from '@/pages/admin/ProjectsTab';
 import SkillsTab from '@/pages/admin/SkillsTab';
 import ExperiencesTab from '@/pages/admin/ExperiencesTab';
 import MessagesTab from '@/pages/admin/MessagesTab';
+import ProfileTab from '@/pages/admin/ProfileTab';
 
 export default function App() {
     return (
@@ -34,6 +35,7 @@ export default function App() {
                     <Route path="skills" element={<SkillsTab />} />
                     <Route path="experiences" element={<ExperiencesTab />} />
                     <Route path="messages" element={<MessagesTab />} />
+                    <Route path="profile" element={<ProfileTab />} />
                 </Route>
 
                 {/* Catch-all */}

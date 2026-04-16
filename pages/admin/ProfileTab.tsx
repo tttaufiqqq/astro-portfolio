@@ -1,0 +1,203 @@
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, Upload, User } from 'lucide-react';
+import { toast } from 'sonner';
+import type { Profile } from '@/types/models';
+import FormField from '@/components/admin/FormField';
+import ThemedInput from '@/components/admin/ThemedInput';
+import ThemedTextarea from '@/components/admin/ThemedTextarea';
+import ThemedButton from '@/components/admin/ThemedButton';
+
+interface FormState {
+    name: string;
+    role: string;
+    bio: string;
+    githubUrl: string;
+    linkedinUrl: string;
+    twitterUrl: string;
+}
+
+const empty: FormState = { name: '', role: '', bio: '', githubUrl: '', linkedinUrl: '', twitterUrl: '' };
+
+export default function ProfileTab() {
+    const [form, setForm] = useState<FormState>(empty);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [uploadingResume, setUploadingResume] = useState(false);
+
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+    const resumeInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        fetch('/api/profile')
+            .then(r => r.json())
+            .then((p: Profile) => {
+                setForm({ name: p.name, role: p.role, bio: p.bio, githubUrl: p.githubUrl ?? '', linkedinUrl: p.linkedinUrl ?? '', twitterUrl: p.twitterUrl ?? '' });
+                setAvatarUrl(p.avatarUrl);
+                setResumeUrl(p.resumeUrl);
+            })
+            .catch(() => toast.error('Failed to load profile'))
+            .finally(() => setLoading(false));
+    }, []);
+
+    function set(key: keyof FormState, value: string) {
+        setForm(f => ({ ...f, [key]: value }));
+    }
+
+    async function uploadFile(file: File, fieldName: 'avatar' | 'resume'): Promise<string> {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd });
+        if (!res.ok) throw new Error('Upload failed');
+        const { url } = await res.json();
+        return url;
+    }
+
+    async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingAvatar(true);
+        try {
+            const url = await uploadFile(file, 'avatar');
+            setAvatarUrl(url);
+        } catch {
+            toast.error('Avatar upload failed');
+        } finally {
+            setUploadingAvatar(false);
+            if (avatarInputRef.current) avatarInputRef.current.value = '';
+        }
+    }
+
+    async function handleResumeChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingResume(true);
+        try {
+            const url = await uploadFile(file, 'resume');
+            setResumeUrl(url);
+        } catch {
+            toast.error('Resume upload failed');
+        } finally {
+            setUploadingResume(false);
+            if (resumeInputRef.current) resumeInputRef.current.value = '';
+        }
+    }
+
+    async function handleSave(e: React.FormEvent) {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch('/api/profile', {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: form.name,
+                    role: form.role,
+                    bio: form.bio,
+                    githubUrl: form.githubUrl,
+                    linkedinUrl: form.linkedinUrl,
+                    twitterUrl: form.twitterUrl,
+                    avatarUrl,
+                    resumeUrl,
+                }),
+            });
+            if (!res.ok) throw new Error();
+            toast.success('Profile updated');
+        } catch {
+            toast.error('Failed to save profile');
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center py-20">
+                <Loader2 className="animate-spin text-cyan-accent" size={24} />
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-2xl">
+            <h1 className="text-2xl font-bold text-slate-100 mb-8">Profile</h1>
+
+            <form onSubmit={handleSave} className="space-y-6">
+                {/* Avatar */}
+                <div className="flex items-center gap-6">
+                    <div className="w-24 h-24 rounded-2xl bg-oxford-blue border border-yinmn-blue/30 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {avatarUrl
+                            ? <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                            : <User size={32} className="text-slate-500" />
+                        }
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-sm text-slate-400">Profile photo</p>
+                        <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
+                        <button type="button" disabled={uploadingAvatar} onClick={() => avatarInputRef.current?.click()}
+                            className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                            {uploadingAvatar ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                            {uploadingAvatar ? 'Uploading…' : avatarUrl ? 'Replace photo' : 'Upload photo'}
+                        </button>
+                        <p className="text-xs text-slate-600">JPEG, PNG, WebP — max 5MB</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField label="Name" required>
+                        <ThemedInput value={form.name} onChange={e => set('name', e.target.value)} required />
+                    </FormField>
+                    <FormField label="Role / Title" required>
+                        <ThemedInput value={form.role} onChange={e => set('role', e.target.value)} placeholder="Software Engineer & Developer" required />
+                    </FormField>
+                </div>
+
+                <FormField label="Bio">
+                    <ThemedTextarea value={form.bio} onChange={e => set('bio', e.target.value)} rows={4} placeholder="Tell visitors about yourself…" />
+                </FormField>
+
+                {/* Resume */}
+                <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Resume / CV</p>
+                    {resumeUrl && (
+                        <a href={resumeUrl} target="_blank" rel="noopener noreferrer"
+                            className="inline-block text-xs text-cyan-accent hover:underline mb-1">
+                            View current resume
+                        </a>
+                    )}
+                    <div className="flex items-center gap-3">
+                        <input ref={resumeInputRef} type="file" accept="application/pdf" className="hidden" onChange={handleResumeChange} />
+                        <button type="button" disabled={uploadingResume} onClick={() => resumeInputRef.current?.click()}
+                            className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                            {uploadingResume ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                            {uploadingResume ? 'Uploading…' : resumeUrl ? 'Replace resume' : 'Upload resume'}
+                        </button>
+                        <span className="text-xs text-slate-600">PDF only — max 5MB</span>
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <p className="text-sm font-medium text-slate-300">Social Links</p>
+                    <FormField label="GitHub URL">
+                        <ThemedInput type="url" value={form.githubUrl} onChange={e => set('githubUrl', e.target.value)} placeholder="https://github.com/…" />
+                    </FormField>
+                    <FormField label="LinkedIn URL">
+                        <ThemedInput type="url" value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/in/…" />
+                    </FormField>
+                    <FormField label="Twitter / X URL">
+                        <ThemedInput type="url" value={form.twitterUrl} onChange={e => set('twitterUrl', e.target.value)} placeholder="https://x.com/…" />
+                    </FormField>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                    <ThemedButton type="submit" disabled={saving}>
+                        {saving ? <Loader2 size={16} className="animate-spin" /> : 'Save Profile'}
+                    </ThemedButton>
+                </div>
+            </form>
+        </div>
+    );
+}

@@ -78,3 +78,18 @@ model Message {
 
   @@map("messages")
 }
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.NVarChar(200)
+  role        String   @db.NVarChar(200)
+  bio         String   @db.NVarChar(Max)
+  avatarUrl   String?  @db.NVarChar(500)
+  resumeUrl   String?  @db.NVarChar(500)
+  githubUrl   String?  @db.NVarChar(500)
+  linkedinUrl String?  @db.NVarChar(500)
+  twitterUrl  String?  @db.NVarChar(500)
+  updatedAt   DateTime @updatedAt
+
+  @@map("profile")
+}

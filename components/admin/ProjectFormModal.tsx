@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Project } from '@/types/models';
 import ModalShell from './ModalShell';
@@ -37,6 +37,8 @@ const empty: FormState = {
 export default function ProjectFormModal({ open, onClose, onSaved, project }: Props) {
     const [form, setForm] = useState<FormState>(empty);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const imageInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (project) {
@@ -59,6 +61,25 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
 
     function set(key: keyof FormState, value: string | boolean) {
         setForm(f => ({ ...f, [key]: value }));
+    }
+
+    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd });
+            if (!res.ok) throw new Error();
+            const { url } = await res.json();
+            set('imageUrl', url);
+        } catch {
+            toast.error('Image upload failed');
+        } finally {
+            setUploading(false);
+            if (imageInputRef.current) imageInputRef.current.value = '';
+        }
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -126,8 +147,24 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
                     </FormField>
                 </div>
 
-                <FormField label="Image URL">
-                    <ThemedInput type="url" value={form.imageUrl} onChange={e => set('imageUrl', e.target.value)} placeholder="https://…" />
+                <FormField label="Project Image">
+                    <div className="space-y-2">
+                        {form.imageUrl && (
+                            <div className="relative w-full h-36 rounded-lg overflow-hidden border border-yinmn-blue/30">
+                                <img src={form.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                <button type="button" onClick={() => set('imageUrl', '')}
+                                    className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors">
+                                    <X size={12} />
+                                </button>
+                            </div>
+                        )}
+                        <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                        <button type="button" disabled={uploading} onClick={() => imageInputRef.current?.click()}
+                            className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                            {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                            {uploading ? 'Uploading…' : form.imageUrl ? 'Replace image' : 'Upload image'}
+                        </button>
+                    </div>
                 </FormField>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

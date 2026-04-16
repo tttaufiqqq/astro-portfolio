@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, ChevronDown, ChevronUp, Loader2, Check } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Pencil, ChevronDown, ChevronUp, Loader2, Check, Upload, X } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
@@ -123,8 +123,30 @@ const TYPE_COLORS: Record<BlockType, string> = {
 // ---------------------------------------------------------------------------
 
 function BlockForm({ type, form, onChange }: { type: BlockType; form: AnyForm; onChange: (f: AnyForm) => void }) {
+    const [uploading, setUploading] = useState(false);
+    const imageInputRef = useRef<HTMLInputElement>(null);
+
     function set(key: string, value: string) {
         onChange({ ...form, [key]: value } as AnyForm);
+    }
+
+    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd });
+            if (!res.ok) throw new Error();
+            const { url } = await res.json();
+            set('imageUrl', url);
+        } catch {
+            toast.error('Image upload failed');
+        } finally {
+            setUploading(false);
+            if (imageInputRef.current) imageInputRef.current.value = '';
+        }
     }
 
     switch (type) {
@@ -157,8 +179,24 @@ function BlockForm({ type, form, onChange }: { type: BlockType; form: AnyForm; o
             const f = form as ImageForm;
             return (
                 <div className="space-y-3">
-                    <FormField label="Image URL" required>
-                        <ThemedInput type="url" value={f.imageUrl} onChange={e => set('imageUrl', e.target.value)} placeholder="https://…" required />
+                    <FormField label="Image">
+                        <div className="space-y-2">
+                            {f.imageUrl && (
+                                <div className="relative w-full h-32 rounded-lg overflow-hidden border border-yinmn-blue/30">
+                                    <img src={f.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                    <button type="button" onClick={() => set('imageUrl', '')}
+                                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors">
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            )}
+                            <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                            <button type="button" disabled={uploading} onClick={() => imageInputRef.current?.click()}
+                                className="flex items-center gap-2 px-3 py-1.5 text-xs border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                                {uploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                                {uploading ? 'Uploading…' : f.imageUrl ? 'Replace image' : 'Upload image'}
+                            </button>
+                        </div>
                     </FormField>
                     <FormField label="Alt text">
                         <ThemedInput value={f.alt} onChange={e => set('alt', e.target.value)} placeholder="Describe the image" />

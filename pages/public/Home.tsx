@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import ProjectCard from '@/components/public/ProjectCard';
 import SkillBadge from '@/components/public/SkillBadge';
 import TimelineItem from '@/components/public/TimelineItem';
-import type { Project, Skill, Experience } from '@/types/models';
+import type { Project, Skill, Experience, Profile } from '@/types/models';
 
 function StaggerContainer({ children, className = '' }: { children: React.ReactNode; className?: string }) {
     const container = {
@@ -31,6 +31,7 @@ function Section({ title, id, children, className = '' }: { title: string; id: s
 }
 
 export default function Home() {
+    const [profile, setProfile] = useState<Profile | null>(null);
     const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
     const [skills, setSkills] = useState<Skill[]>([]);
     const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -40,6 +41,7 @@ export default function Home() {
     const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
+        fetch('/api/profile').then(r => r.json()).then(setProfile).catch(() => {});
         fetch('/api/projects?featured=true&status=published')
             .then(r => r.json()).then(setFeaturedProjects).catch(() => {});
         fetch('/api/skills')
@@ -80,14 +82,12 @@ export default function Home() {
 
                 <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                     className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                    Software Engineer &amp; <br />
-                    <span className="text-cyan-accent">Full-Stack Developer</span>
+                    {profile?.role ?? 'Software Engineer & Full-Stack Developer'}
                 </motion.h1>
 
                 <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                     className="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed">
-                    I build high-quality web applications with modern technologies,
-                    turning complex ideas into clean, documented, and scalable software.
+                    {profile?.bio ?? 'I build high-quality web applications with modern technologies, turning complex ideas into clean, documented, and scalable software.'}
                 </motion.p>
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
@@ -105,19 +105,24 @@ export default function Home() {
             <section id="about" className="py-24 px-6 max-w-7xl mx-auto">
                 <div className="grid md:grid-cols-2 gap-12 items-center">
                     <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-                        <div className="w-full max-w-sm mx-auto rounded-2xl aspect-square bg-oxford-blue border border-yinmn-blue/30 flex items-center justify-center">
-                            <span className="text-slate-500 text-6xl font-bold">T</span>
+                        <div className="w-full max-w-sm mx-auto rounded-2xl aspect-square bg-oxford-blue border border-yinmn-blue/30 overflow-hidden flex items-center justify-center">
+                            {profile?.avatarUrl
+                                ? <img src={profile.avatarUrl} alt={profile.name} className="w-full h-full object-cover" />
+                                : <span className="text-slate-500 text-6xl font-bold">T</span>
+                            }
                         </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-6">
                         <h2 className="text-3xl font-bold border-b-2 border-cyan-accent pb-2 inline-block">About Me</h2>
                         <p className="text-slate-400 leading-relaxed text-lg">
-                            IT undergrad at UTeM, building full-stack web and IoT solutions. Passionate about clean code, scalable architecture, and shipping things that work.
+                            {profile?.bio ?? 'IT undergrad at UTeM, building full-stack web and IoT solutions. Passionate about clean code, scalable architecture, and shipping things that work.'}
                         </p>
-                        <a href="/resume.pdf" target="_blank" rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10">
-                            <Download size={16} /> Download CV
-                        </a>
+                        {profile?.resumeUrl && (
+                            <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10">
+                                <Download size={16} /> Download CV
+                            </a>
+                        )}
                     </motion.div>
                 </div>
             </section>

@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LogOut, FolderKanban, Wrench, Briefcase, MessageSquare } from 'lucide-react';
+import { LogOut, FolderKanban, Wrench, Briefcase, MessageSquare, UserCircle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import RequireAuth from '@/components/admin/RequireAuth';
 
@@ -8,6 +8,7 @@ const tabs = [
     { to: '/admin/skills',      label: 'Skills',      icon: Wrench },
     { to: '/admin/experiences', label: 'Experience',  icon: Briefcase },
     { to: '/admin/messages',    label: 'Messages',    icon: MessageSquare },
+    { to: '/admin/profile',     label: 'Profile',     icon: UserCircle },
 ];
 
 export default function AdminLayout() {
@@ -44,6 +45,11 @@ export default function AdminLayout() {
                                 </NavLink>
                             ))}
                         </nav>
+                        <a href="/" target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-slate-400 hover:text-cyan-accent transition-colors text-sm">
+                            <ExternalLink size={14} />
+                            <span className="hidden sm:inline">View Site</span>
+                        </a>
                         <button
                             onClick={handleLogout}
                             className="flex items-center gap-1.5 text-slate-400 hover:text-red-400 transition-colors text-sm"

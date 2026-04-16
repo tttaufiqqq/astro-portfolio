@@ -90,3 +90,16 @@ export interface Message {
     message: string;
     createdAt: string;
 }
+
+export interface Profile {
+    id: number;
+    name: string;
+    role: string;
+    bio: string;
+    avatarUrl: string | null;
+    resumeUrl: string | null;
+    githubUrl: string | null;
+    linkedinUrl: string | null;
+    twitterUrl: string | null;
+    updatedAt: string;
+}

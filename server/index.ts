@@ -12,6 +12,8 @@ import experiencesRouter from './routes/experiences';
 import messagesRouter from './routes/messages';
 import blocksRouter from './routes/blocks';
 import blockRouter from './routes/block';
+import uploadRouter from './routes/upload';
+import profileRouter from './routes/profile';
 
 dotenv.config();
 
@@ -33,6 +35,8 @@ app.use('/api/skills', skillsRouter);
 app.use('/api/experiences', experiencesRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/blocks', blockRouter);
+app.use('/api/upload', uploadRouter);
+app.use('/api/profile', profileRouter);
 
 // Serve React frontend
 const distPath = path.join(__dirname, '../../dist');
