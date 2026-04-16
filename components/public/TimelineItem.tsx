@@ -36,7 +36,7 @@ export default function TimelineItem({ experience, isLast }: Props) {
         >
             <div
                 className={[
-                    'absolute left-[-5px] top-0 w-2.5 h-2.5 rounded-full',
+                    'absolute left-[-5px] top-2.5 w-2.5 h-2.5 rounded-full',
                     experience.current
                         ? 'bg-cyan-accent shadow-[0_0_10px_rgba(111,255,233,0.5)]'
                         : 'bg-yinmn-blue',
