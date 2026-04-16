@@ -56,6 +56,6 @@ export const PROJECTS = [
 
 export const SOCIAL_LINKS = [
   { icon: Github, href: "https://github.com/tttaufiqqq", label: "GitHub" },
-  { icon: Linkedin, href: "https://linkedin.com/in/taufiq", label: "LinkedIn" },
+  { icon: Linkedin, href: "https://www.linkedin.com/in/taufiq-arifin-81b4aa266/", label: "LinkedIn" },
   { icon: Mail, href: "mailto:taufiq33992@gmail.com", label: "Email" },
 ];
