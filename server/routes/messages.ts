@@ -8,6 +8,10 @@ const prisma = new PrismaClient();
 // Public — contact form
 router.post('/', async (req: Request, res: Response) => {
   const { name, email, message } = req.body;
+  if (!name || !email || !message) {
+    res.status(400).json({ error: 'name, email, and message are required' });
+    return;
+  }
   const msg = await prisma.message.create({ data: { name, email, message } });
   res.status(201).json(msg);
 });

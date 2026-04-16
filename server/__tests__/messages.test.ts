@@ -48,6 +48,28 @@ describe('POST /api/messages (contact form — public)', () => {
       .send({ name: 'Bob', email: 'bob@example.com', message: 'Hi' });
     expect(res.status).toBe(201);
   });
+
+  it('returns 400 when email is missing', async () => {
+    const res = await request(app)
+      .post('/api/messages')
+      .send({ name: 'Alice', message: 'Hello!' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/required/);
+  });
+
+  it('returns 400 when name is missing', async () => {
+    const res = await request(app)
+      .post('/api/messages')
+      .send({ email: 'alice@example.com', message: 'Hello!' });
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when message body is missing', async () => {
+    const res = await request(app)
+      .post('/api/messages')
+      .send({ name: 'Alice', email: 'alice@example.com' });
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('GET /api/messages (admin only)', () => {
