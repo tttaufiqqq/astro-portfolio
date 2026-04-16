@@ -1,24 +1,12 @@
-name: Deploy to GitHub Pages
+name: Deploy to Azure App Service
 
 on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -26,22 +14,33 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
 
-      - name: Build
-        run: npm run build
+      - name: Build server
+        run: |
+          cd server
+          npm ci
+          npm run build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy/dist
+          mkdir -p deploy/server/dist
+          cp -r dist/. deploy/dist/
+          cp -r server/dist/. deploy/server/dist/
+          cp -r server/node_modules deploy/node_modules
+          cp -r server/prisma deploy/prisma
+          cp server/package.json deploy/package.json
+          cd deploy && zip -r ../release.zip .
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
         with:
-          path: dist
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          app-name: tttaufiqq-portfolio
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+          package: release.zip

@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.NVarChar(200)
+  description String   @db.NVarChar(Max)
+  techStack   String   @db.NVarChar(500)
+  githubUrl   String?  @db.NVarChar(500)
+  demoUrl     String?  @db.NVarChar(500)
+  imageUrl    String?  @db.NVarChar(500)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Skill {
+  id       Int    @id @default(autoincrement())
+  name     String @db.NVarChar(100)
+  category String @db.NVarChar(100)
+
+  @@map("skills")
+}
+
+model Experience {
+  id          Int      @id @default(autoincrement())
+  company     String   @db.NVarChar(200)
+  role        String   @db.NVarChar(200)
+  startDate   DateTime
+  endDate     DateTime?
+  description String   @db.NVarChar(Max)
+
+  @@map("experiences")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.NVarChar(200)
+  email     String   @db.NVarChar(200)
+  message   String   @db.NVarChar(Max)
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}
