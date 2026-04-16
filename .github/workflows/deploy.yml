@@ -24,7 +24,7 @@ jobs:
       - name: Backend tests
         run: |
           cd server
-          npm ci
+          npm install
           npm test
 
   build_and_deploy:
@@ -47,7 +47,7 @@ jobs:
       - name: Build server
         run: |
           cd server
-          npm ci
+          npm install
           npx prisma generate
           npm run build
 
