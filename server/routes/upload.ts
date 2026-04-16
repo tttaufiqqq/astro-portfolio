@@ -21,7 +21,8 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
             res.status(400).json({ error: 'No file provided' });
             return;
         }
-        const url = await uploadToBlob(req.file.buffer, req.file.originalname, req.file.mimetype);
+        const folder = typeof req.body.folder === 'string' ? req.body.folder : 'uploads';
+        const url = await uploadToBlob(req.file.buffer, req.file.originalname, req.file.mimetype, folder);
         res.json({ url });
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

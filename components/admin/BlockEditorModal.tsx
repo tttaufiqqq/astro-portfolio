@@ -137,6 +137,7 @@ function BlockForm({ type, form, onChange }: { type: BlockType; form: AnyForm; o
         try {
             const fd = new FormData();
             fd.append('file', file);
+            fd.append('folder', 'blocks');
             const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd });
             if (!res.ok) throw new Error();
             const { url } = await res.json();

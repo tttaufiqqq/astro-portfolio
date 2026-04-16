@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
+import { deleteFromBlob } from '../lib/blob';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -50,6 +51,21 @@ router.put('/', requireAuth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
+// DELETE /api/profile/avatar — protected
+router.delete('/avatar', requireAuth, async (_req, res) => {
+    try {
+        const profile = await prisma.profile.findFirst();
+        if (profile?.avatarUrl) {
+            await deleteFromBlob(profile.avatarUrl);
+            await prisma.profile.update({ where: { id: profile.id }, data: { avatarUrl: null } });
+        }
+        res.json({ ok: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to remove avatar' });
     }
 });
 

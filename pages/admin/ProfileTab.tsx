@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Upload, User } from 'lucide-react';
+import { Loader2, Upload, User, X } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Profile } from '@/types/models';
 import FormField from '@/components/admin/FormField';
@@ -47,12 +47,25 @@ export default function ProfileTab() {
     }
 
     async function uploadFile(file: File, fieldName: 'avatar' | 'resume'): Promise<string> {
+        const folder = fieldName === 'resume' ? 'resumes' : 'avatars';
         const fd = new FormData();
         fd.append('file', file);
+        fd.append('folder', folder);
         const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd });
         if (!res.ok) throw new Error('Upload failed');
         const { url } = await res.json();
         return url;
+    }
+
+    async function removeAvatar() {
+        try {
+            const res = await fetch('/api/profile/avatar', { method: 'DELETE', credentials: 'include' });
+            if (!res.ok) throw new Error();
+            setAvatarUrl(null);
+            toast.success('Photo removed');
+        } catch {
+            toast.error('Failed to remove photo');
+        }
     }
 
     async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -137,11 +150,19 @@ export default function ProfileTab() {
                     <div className="space-y-2">
                         <p className="text-sm text-slate-400">Profile photo</p>
                         <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
-                        <button type="button" disabled={uploadingAvatar} onClick={() => avatarInputRef.current?.click()}
-                            className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
-                            {uploadingAvatar ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                            {uploadingAvatar ? 'Uploading…' : avatarUrl ? 'Replace photo' : 'Upload photo'}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button type="button" disabled={uploadingAvatar} onClick={() => avatarInputRef.current?.click()}
+                                className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                                {uploadingAvatar ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                                {uploadingAvatar ? 'Uploading…' : avatarUrl ? 'Replace photo' : 'Upload photo'}
+                            </button>
+                            {avatarUrl && (
+                                <button type="button" onClick={removeAvatar}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-red-400 hover:border-red-400/40 transition-colors">
+                                    <X size={14} /> Remove
+                                </button>
+                            )}
+                        </div>
                         <p className="text-xs text-slate-600">JPEG, PNG, WebP — max 5MB</p>
                     </div>
                 </div>
