@@ -17,5 +17,5 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src", "components", "lib"]
+  "include": ["src", "components", "lib", "pages", "layouts", "hooks", "types"]
 }
