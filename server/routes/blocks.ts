@@ -5,6 +5,15 @@ import { requireAuth } from '../middleware/auth';
 const router = Router({ mergeParams: true });
 const prisma = new PrismaClient();
 
+// GET /api/projects/:projectId/blocks — list blocks for a project (protected)
+router.get('/', requireAuth, async (req: Request, res: Response) => {
+    const blocks = await prisma.contentBlock.findMany({
+        where: { projectId: Number(req.params.projectId) },
+        orderBy: { order: 'asc' },
+    });
+    res.json(blocks);
+});
+
 // POST /api/projects/:projectId/blocks — create a block
 router.post('/', requireAuth, async (req: Request, res: Response) => {
     const { type, order, content, language, imageUrl } = req.body;

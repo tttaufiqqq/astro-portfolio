@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, ExternalLink, Loader2 } from 'lucide-react';
+import { Plus, Pencil, ExternalLink, Loader2, LayoutList } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
@@ -8,12 +8,14 @@ import SortableRow from '@/components/admin/SortableRow';
 import ConfirmDelete from '@/components/admin/ConfirmDelete';
 import ThemedButton from '@/components/admin/ThemedButton';
 import ProjectFormModal from '@/components/admin/ProjectFormModal';
+import BlockEditorModal from '@/components/admin/BlockEditorModal';
 
 export default function ProjectsTab() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Project | null>(null);
+    const [blockProject, setBlockProject] = useState<Project | null>(null);
 
     const sensors = useSensors(useSensor(PointerSensor));
 
@@ -64,6 +66,7 @@ export default function ProjectsTab() {
 
     function openCreate() { setEditing(null); setModalOpen(true); }
     function openEdit(project: Project) { setEditing(project); setModalOpen(true); }
+    function openBlocks(project: Project) { setBlockProject(project); }
 
     if (loading) {
         return (
@@ -124,6 +127,11 @@ export default function ProjectsTab() {
                                                 <ExternalLink size={14} />
                                             </a>
                                         )}
+                                        <button type="button" onClick={() => openBlocks(project)}
+                                            title="Edit content blocks"
+                                            className="text-slate-400 hover:text-purple-400 transition-colors p-1.5 rounded-lg hover:bg-purple-400/5">
+                                            <LayoutList size={14} />
+                                        </button>
                                         <button type="button" onClick={() => openEdit(project)}
                                             className="text-slate-400 hover:text-cyan-accent transition-colors p-1.5 rounded-lg hover:bg-cyan-accent/5">
                                             <Pencil size={14} />
@@ -142,6 +150,13 @@ export default function ProjectsTab() {
                 onClose={() => setModalOpen(false)}
                 onSaved={handleSaved}
                 project={editing}
+            />
+
+            <BlockEditorModal
+                open={blockProject !== null}
+                onClose={() => setBlockProject(null)}
+                projectId={blockProject?.id ?? 0}
+                projectTitle={blockProject?.title ?? ''}
             />
         </div>
     );
