@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: 'Inter', var(--font-sans);
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --color-c0: #001219;
+    --color-c1: #005f73;
+    --color-c2: #0a9396;
+    --color-c3: #94d2bd;
+    --color-c4: #e9d8a6;
+    --color-c5: #ee9b00;
+    --color-c6: #ca6702;
+    --color-c7: #bb3e03;
+    --color-c8: #ae2012;
+    --color-c9: #9b2226;
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+}
+
+:root {
+    --background: #001219;
+    --foreground: #e9d8a6;
+    --card: rgba(0, 95, 115, 0.1);
+    --card-foreground: #e9d8a6;
+    --popover: #001219;
+    --popover-foreground: #e9d8a6;
+    --primary: #ee9b00;
+    --primary-foreground: #001219;
+    --secondary: #005f73;
+    --secondary-foreground: #94d2bd;
+    --muted: #005f73;
+    --muted-foreground: #94d2bd;
+    --accent: #ee9b00;
+    --accent-foreground: #001219;
+    --destructive: #9b2226;
+    --border: #005f73;
+    --input: #005f73;
+    --ring: #0a9396;
+    --radius: 0.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+@layer components {
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+  }
+
+  .theme-header {
+    grid-column: 1 / -1;
+    @apply p-8 md:px-12 border-b border-c1 flex justify-between items-end;
+  }
+
+  .theme-sidebar {
+    @apply p-8 md:p-12 border-r border-c1 flex flex-col gap-8;
+  }
+
+  .theme-main {
+    @apply p-8 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .theme-footer {
+    grid-column: 1 / -1;
+    @apply bg-c7 p-3 md:px-12 flex justify-between items-center;
+  }
+}
