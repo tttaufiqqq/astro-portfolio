@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
+import { Loader2, FolderOpen } from 'lucide-react';
 import ProjectCard from '@/components/public/ProjectCard';
 import type { Project } from '@/types/models';
 
@@ -29,11 +30,14 @@ export default function Projects() {
             </motion.div>
 
             {loading ? (
-                <div className="text-center py-24 text-slate-500">Loading...</div>
+                <div className="flex justify-center py-24">
+                    <Loader2 size={32} className="animate-spin text-cyan-accent" />
+                </div>
             ) : projects.length === 0 ? (
                 <div className="text-center py-24 text-slate-500">
+                    <FolderOpen size={40} className="mx-auto mb-4 opacity-30" />
                     <p className="text-lg">No projects published yet.</p>
-                    <p className="text-sm mt-2">Check back soon.</p>
+                    <p className="text-sm mt-2 text-slate-600">Check back soon.</p>
                 </div>
             ) : (
                 <motion.div variants={container} initial="hidden" animate="show" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

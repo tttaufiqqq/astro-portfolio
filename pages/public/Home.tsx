@@ -81,7 +81,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                     {profile?.role ?? 'Software Engineer & Full-Stack Developer'}
                 </motion.h1>
 
@@ -92,10 +92,10 @@ export default function Home() {
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
                     className="flex flex-wrap justify-center gap-4">
-                    <Link to="/projects" className="bg-cyan-accent text-space-cadet px-8 py-3 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10">
+                    <Link to="/projects" className="bg-cyan-accent text-space-cadet px-8 py-3 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
                         View Projects
                     </Link>
-                    <a href="#contact" className="border border-yinmn-blue px-8 py-3 rounded-lg font-bold hover:bg-oxford-blue transition-colors">
+                    <a href="#contact" className="border border-yinmn-blue px-8 py-3 rounded-lg font-bold hover:bg-oxford-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
                         Get In Touch
                     </a>
                 </motion.div>
@@ -103,7 +103,7 @@ export default function Home() {
 
             {/* About */}
             <section id="about" className="py-24 px-6 max-w-7xl mx-auto">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div className="grid sm:grid-cols-2 gap-12 items-center">
                     <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
                         <div className="w-full max-w-sm mx-auto rounded-2xl aspect-square bg-oxford-blue border border-yinmn-blue/30 overflow-hidden flex items-center justify-center">
                             {profile?.avatarUrl
@@ -119,7 +119,7 @@ export default function Home() {
                         </p>
                         {profile?.resumeUrl && (
                             <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10">
+                                className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent">
                                 <Download size={16} /> Download CV
                             </a>
                         )}
@@ -136,7 +136,7 @@ export default function Home() {
                         ))}
                     </StaggerContainer>
                     <div className="mt-10 text-center">
-                        <Link to="/projects" className="inline-block border border-yinmn-blue px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-oxford-blue transition-colors">
+                        <Link to="/projects" className="inline-block border border-yinmn-blue px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-oxford-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent">
                             View All Projects →
                         </Link>
                     </div>
@@ -184,26 +184,26 @@ export default function Home() {
                                 <div className="grid gap-1.5">
                                     <label className="text-sm text-slate-400">Name</label>
                                     <input type="text" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} required placeholder="Your name"
-                                        className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 transition-colors" />
+                                        className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 focus:ring-1 focus:ring-cyan-accent/30 transition-colors" />
                                     {contactErrors.name && <p className="text-xs text-red-400">{contactErrors.name}</p>}
                                 </div>
                                 <div className="grid gap-1.5">
                                     <label className="text-sm text-slate-400">Email</label>
                                     <input type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} required placeholder="your@email.com"
-                                        className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 transition-colors" />
+                                        className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 focus:ring-1 focus:ring-cyan-accent/30 transition-colors" />
                                     {contactErrors.email && <p className="text-xs text-red-400">{contactErrors.email}</p>}
                                 </div>
                             </div>
                             <div className="grid gap-1.5">
                                 <label className="text-sm text-slate-400">Message</label>
                                 <textarea rows={4} value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} required placeholder="What's on your mind?"
-                                    className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 transition-colors resize-none" />
+                                    className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 focus:ring-1 focus:ring-cyan-accent/30 transition-colors resize-none" />
                                 {contactErrors.message && <p className="text-xs text-red-400">{contactErrors.message}</p>}
                             </div>
                             {contactState === 'error' && <p className="text-sm text-red-400">Something went wrong. Please try again.</p>}
                             <div className="flex items-center gap-4">
                                 <button type="submit" disabled={contactState === 'sending'}
-                                    className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 disabled:opacity-60">
+                                    className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent">
                                     <Send size={15} />
                                     {contactState === 'sending' ? 'Sending…' : 'Send Message'}
                                 </button>

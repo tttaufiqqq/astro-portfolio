@@ -13,7 +13,7 @@ export default function ImageRenderer({ block }: Props) {
     return (
         <figure>
             <div className="rounded-xl overflow-hidden bg-oxford-blue">
-                <img src={src} alt={alt || ''} loading="lazy" className="w-full h-auto" />
+                <img src={src} alt={alt || caption || 'Project image'} loading="lazy" className="w-full h-auto" />
             </div>
             {caption && (
                 <figcaption className="mt-2 text-center text-sm text-slate-500 italic">{caption}</figcaption>

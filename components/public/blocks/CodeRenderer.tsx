@@ -19,7 +19,7 @@ export default function CodeRenderer({ block }: Props) {
                     {language}
                 </div>
             )}
-            <pre className="bg-space-cadet overflow-x-auto p-4 text-sm">
+            <pre className="bg-space-cadet overflow-x-auto p-4 text-xs sm:text-sm scrollbar-thin">
                 <code
                     className={language ? `language-${language}` : undefined}
                     dangerouslySetInnerHTML={{ __html: highlighted }}

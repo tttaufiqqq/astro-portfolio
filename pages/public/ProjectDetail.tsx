@@ -56,8 +56,17 @@ export default function ProjectDetail() {
             .finally(() => setLoading(false));
     }, [slug]);
 
-    if (loading) return <div className="pt-32 text-center text-slate-500">Loading...</div>;
-    if (!data) return <div className="pt-32 text-center text-slate-500">Project not found.</div>;
+    if (loading) return (
+        <div className="pt-32 flex justify-center">
+            <div className="w-8 h-8 border-2 border-cyan-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+    );
+    if (!data) return (
+        <div className="pt-32 text-center text-slate-500">
+            <p className="text-lg font-medium">Project not found.</p>
+            <a href="/projects" className="mt-4 inline-block text-sm text-cyan-accent hover:underline">← Back to Projects</a>
+        </div>
+    );
 
     const { project, prev, next } = data;
     const blocks: ContentBlock[] = project.contentBlocks ?? [];
@@ -79,7 +88,7 @@ export default function ProjectDetail() {
                     <div className="w-full h-full bg-gradient-to-br from-oxford-blue via-yinmn-blue/40 to-space-cadet" />
                 )}
                 <Link to="/projects"
-                    className="absolute top-6 left-6 inline-flex items-center gap-2 text-sm text-slate-300 hover:text-cyan-accent transition-colors bg-space-cadet/60 backdrop-blur-sm rounded-full px-4 py-2">
+                    className="absolute top-20 left-6 inline-flex items-center gap-2 text-sm text-slate-300 hover:text-cyan-accent transition-colors bg-space-cadet/60 backdrop-blur-sm rounded-full px-4 py-2 z-10">
                     <ArrowLeft size={14} /> Back to Projects
                 </Link>
                 <div className="absolute bottom-0 left-0 right-0 px-6 pb-8">
@@ -98,7 +107,7 @@ export default function ProjectDetail() {
                     variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
                     <div className="flex flex-wrap gap-2">
                         {techStack.map((tag: string) => (
-                            <span key={tag} className="text-[10px] font-mono uppercase tracking-wider bg-space-cadet px-2 py-1 rounded text-cyan-accent/80 border border-cyan-accent/20">
+                            <span key={tag} className="text-[10px] sm:text-xs font-mono uppercase tracking-wider bg-space-cadet px-2 py-1 rounded text-cyan-accent/80 border border-cyan-accent/20">
                                 {tag}
                             </span>
                         ))}

@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Github, Linkedin, Mail, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
@@ -13,10 +13,19 @@ const NAV_LINKS = [
 export default function PublicLayout() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [profile, setProfile] = useState<Profile | null>(null);
+    const { pathname } = useLocation();
 
     useEffect(() => {
         fetch('/api/profile').then(r => r.json()).then(setProfile).catch(() => {});
     }, []);
+
+    // Close mobile menu on route change
+    useEffect(() => { setMenuOpen(false); }, [pathname]);
+
+    function isActive(href: string) {
+        if (href === '/#about') return pathname === '/';
+        return pathname === href || pathname.startsWith(href + '/');
+    }
 
     return (
         <div className="min-h-screen bg-space-cadet text-slate-200 font-sans antialiased">
@@ -28,27 +37,34 @@ export default function PublicLayout() {
                         animate={{ opacity: 1, x: 0 }}
                         className="text-cyan-accent font-mono font-bold text-xl"
                     >
-                        <Link to="/">&lt;tttaufiqqq /&gt;</Link>
+                        <Link to="/" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded">
+                            &lt;tttaufiqqq /&gt;
+                        </Link>
                     </motion.div>
 
                     <div className="hidden md:flex space-x-8 text-sm font-medium">
-                        {NAV_LINKS.map((item) => (
-                            <a
-                                key={item.label}
-                                href={item.href}
-                                className="hover:text-cyan-accent transition-colors relative group"
-                            >
-                                {item.label}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-accent transition-all group-hover:w-full" />
-                            </a>
-                        ))}
+                        {NAV_LINKS.map((item) => {
+                            const active = isActive(item.href);
+                            return (
+                                <a
+                                    key={item.label}
+                                    href={item.href}
+                                    className={`transition-colors relative group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded px-1 ${active ? 'text-cyan-accent' : 'hover:text-cyan-accent'}`}
+                                >
+                                    {item.label}
+                                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-cyan-accent transition-all ${active ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                                </a>
+                            );
+                        })}
                     </div>
 
                     <button
                         type="button"
-                        className="md:hidden text-slate-400 hover:text-cyan-accent transition-colors"
+                        className="md:hidden text-slate-400 hover:text-cyan-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded"
                         onClick={() => setMenuOpen((o) => !o)}
                         aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                        aria-pressed={menuOpen}
+                        aria-expanded={menuOpen}
                     >
                         {menuOpen ? <X size={22} /> : <Menu size={22} />}
                     </button>
@@ -65,16 +81,19 @@ export default function PublicLayout() {
                             className="md:hidden overflow-hidden bg-oxford-blue border-t border-yinmn-blue/30"
                         >
                             <div className="px-6 py-4 space-y-4">
-                                {NAV_LINKS.map((item) => (
-                                    <a
-                                        key={item.label}
-                                        href={item.href}
-                                        onClick={() => setMenuOpen(false)}
-                                        className="block text-sm font-medium text-slate-400 hover:text-cyan-accent transition-colors"
-                                    >
-                                        {item.label}
-                                    </a>
-                                ))}
+                                {NAV_LINKS.map((item) => {
+                                    const active = isActive(item.href);
+                                    return (
+                                        <a
+                                            key={item.label}
+                                            href={item.href}
+                                            onClick={() => setMenuOpen(false)}
+                                            className={`block text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded px-1 ${active ? 'text-cyan-accent' : 'text-slate-400 hover:text-cyan-accent'}`}
+                                        >
+                                            {item.label}
+                                        </a>
+                                    );
+                                })}
                             </div>
                         </motion.div>
                     )}
@@ -98,17 +117,23 @@ export default function PublicLayout() {
 
                     <div className="flex space-x-6">
                         {profile?.githubUrl && (
-                            <motion.a whileHover={{ y: -3 }} href={profile.githubUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="GitHub">
+                            <motion.a whileHover={{ y: -3 }} href={profile.githubUrl} target="_blank" rel="noopener noreferrer"
+                                className="text-slate-400 hover:text-cyan-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded"
+                                aria-label="GitHub">
                                 <Github size={24} />
                             </motion.a>
                         )}
                         {profile?.linkedinUrl && (
-                            <motion.a whileHover={{ y: -3 }} href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="LinkedIn">
+                            <motion.a whileHover={{ y: -3 }} href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer"
+                                className="text-slate-400 hover:text-cyan-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded"
+                                aria-label="LinkedIn">
                                 <Linkedin size={24} />
                             </motion.a>
                         )}
                         {profile?.twitterUrl && (
-                            <motion.a whileHover={{ y: -3 }} href={profile.twitterUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-accent transition-colors" aria-label="Twitter / X">
+                            <motion.a whileHover={{ y: -3 }} href={profile.twitterUrl} target="_blank" rel="noopener noreferrer"
+                                className="text-slate-400 hover:text-cyan-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded"
+                                aria-label="Twitter / X">
                                 <X size={24} />
                             </motion.a>
                         )}

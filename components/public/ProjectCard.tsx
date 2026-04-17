@@ -76,7 +76,7 @@ export default function ProjectCard({ project }: Props) {
 
             <Link
                 to={`/projects/${project.slug}`}
-                className="text-sm text-cyan-accent font-medium hover:underline mt-auto"
+                className="text-sm text-cyan-accent font-medium hover:underline mt-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded"
             >
                 Read More →
             </Link>
