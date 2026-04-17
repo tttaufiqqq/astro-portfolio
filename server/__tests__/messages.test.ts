@@ -5,13 +5,24 @@ import jwt from 'jsonwebtoken';
 const mockPrisma = vi.hoisted(() => ({
   message: {
     findMany: vi.fn(),
+    findUnique: vi.fn(),
     create: vi.fn(),
     delete: vi.fn(),
+    count: vi.fn(),
+    updateMany: vi.fn(),
   },
 }));
 
+const mockResendSend = vi.hoisted(() => vi.fn());
+
 vi.mock('@prisma/client', () => ({
   PrismaClient: function() { return mockPrisma; },
+}));
+
+vi.mock('resend', () => ({
+  Resend: function() {
+    return { emails: { send: mockResendSend } };
+  },
 }));
 
 import app from '../app';
@@ -86,6 +97,54 @@ describe('GET /api/messages (admin only)', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
     expect(res.body[0].email).toBe('alice@example.com');
+  });
+});
+
+describe('POST /api/messages/:id/reply', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns 401 without auth', async () => {
+    const res = await request(app).post('/api/messages/1/reply').send({ body: 'Hi!' });
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 400 when body is missing', async () => {
+    const res = await request(app)
+      .post('/api/messages/1/reply')
+      .set('Cookie', authCookie())
+      .send({});
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/body/);
+  });
+
+  it('returns 404 when message does not exist', async () => {
+    mockPrisma.message.findUnique.mockResolvedValue(null);
+    const res = await request(app)
+      .post('/api/messages/99/reply')
+      .set('Cookie', authCookie())
+      .send({ body: 'Hi!' });
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 204 on successful reply', async () => {
+    mockPrisma.message.findUnique.mockResolvedValue(sampleMessage);
+    mockResendSend.mockResolvedValue({ data: { id: 'email-123' }, error: null });
+    const res = await request(app)
+      .post('/api/messages/1/reply')
+      .set('Cookie', authCookie())
+      .send({ body: 'Thanks for reaching out!' });
+    expect(res.status).toBe(204);
+  });
+
+  it('returns 500 when Resend returns an error', async () => {
+    mockPrisma.message.findUnique.mockResolvedValue(sampleMessage);
+    mockResendSend.mockResolvedValue({ data: null, error: { message: 'Domain not verified' } });
+    const res = await request(app)
+      .post('/api/messages/1/reply')
+      .set('Cookie', authCookie())
+      .send({ body: 'Hi!' });
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('Domain not verified');
   });
 });
 

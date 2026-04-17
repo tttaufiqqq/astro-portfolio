@@ -90,9 +90,10 @@ router.post('/:id/reply', requireAuth, async (req: Request, res: Response) => {
 
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM ?? 'Portfolio <onboarding@resend.dev>',
-      to: msg.email,
-      subject: `Re: Your message to ${process.env.OWNER_NAME ?? 'me'}`,
-      text: `Hi ${msg.name},\n\n${body}\n\n---\nThis is a reply to your message: "${msg.message}"`,
+      to: process.env.ADMIN_EMAIL ?? 'taufiq33992@gmail.com',
+      replyTo: msg.email,
+      subject: `Re: ${msg.name} — ${msg.email}`,
+      text: `Reply to: ${msg.name} <${msg.email}>\n\n${body}\n\n---\nOriginal message: "${msg.message}"`,
     });
 
     if (error) {
