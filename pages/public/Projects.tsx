@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
-import { Loader2, FolderOpen } from 'lucide-react';
+import { Loader2, FolderOpen, AlertCircle } from 'lucide-react';
 import ProjectCard from '@/components/public/ProjectCard';
 import type { Project } from '@/types/models';
 
@@ -12,12 +12,14 @@ const container = {
 export default function Projects() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         fetch('/api/projects?status=published')
-            .then(r => r.json())
-            .then(data => { setProjects(data); setLoading(false); })
-            .catch(() => setLoading(false));
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(data => setProjects(data))
+            .catch(() => setError(true))
+            .finally(() => setLoading(false));
     }, []);
 
     return (
@@ -32,6 +34,12 @@ export default function Projects() {
             {loading ? (
                 <div className="flex justify-center py-24">
                     <Loader2 size={32} className="animate-spin text-cyan-accent" />
+                </div>
+            ) : error ? (
+                <div className="text-center py-24 text-slate-500">
+                    <AlertCircle size={40} className="mx-auto mb-4 opacity-30" />
+                    <p className="text-lg">Failed to load projects.</p>
+                    <p className="text-sm mt-2 text-slate-600">Please refresh the page.</p>
                 </div>
             ) : projects.length === 0 ? (
                 <div className="text-center py-24 text-slate-500">

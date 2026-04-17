@@ -12,6 +12,7 @@ import SkillsTab from '@/pages/admin/SkillsTab';
 import ExperiencesTab from '@/pages/admin/ExperiencesTab';
 import MessagesTab from '@/pages/admin/MessagesTab';
 import ProfileTab from '@/pages/admin/ProfileTab';
+import NotFound from '@/pages/public/NotFound';
 
 export default function App() {
     return (
@@ -39,7 +40,9 @@ export default function App() {
                 </Route>
 
                 {/* Catch-all */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<PublicLayout />}>
+                    <Route path="*" element={<NotFound />} />
+                </Route>
             </Routes>
         </BrowserRouter>
         </>

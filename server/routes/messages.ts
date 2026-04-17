@@ -1,17 +1,36 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Resend } from 'resend';
+import rateLimit from 'express-rate-limit';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message: { error: 'Too many messages sent. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // Public — contact form
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', contactLimiter, async (req: Request, res: Response) => {
   const { name, email, message } = req.body;
   if (!name || !email || !message) {
     res.status(400).json({ error: 'name, email, and message are required' });
+    return;
+  }
+  if (!EMAIL_RE.test(email)) {
+    res.status(400).json({ error: 'Invalid email address' });
+    return;
+  }
+  if (message.length > 5000) {
+    res.status(400).json({ error: 'Message must be 5000 characters or fewer' });
     return;
   }
   const msg = await prisma.message.create({ data: { name, email, message } });
