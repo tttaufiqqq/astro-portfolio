@@ -41,7 +41,7 @@ export default function Contact() {
     }
 
     return (
-        <div className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
+        <div className="pt-24 pb-14 md:pt-32 md:pb-20 px-6 max-w-4xl mx-auto">
             <div className="mb-12">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">Get In Touch</h1>
                 <p className="text-slate-400 text-lg max-w-xl">

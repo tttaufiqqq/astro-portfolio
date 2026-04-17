@@ -23,7 +23,7 @@ export default function Projects() {
     }, []);
 
     return (
-        <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+        <div className="pt-24 pb-14 md:pt-32 md:pb-20 px-6 max-w-7xl mx-auto">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">All Projects</h1>
                 <p className="text-slate-400 text-lg max-w-xl">

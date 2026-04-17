@@ -95,7 +95,7 @@ export default function ProjectDetail() {
                 </Link>
                 <div className="absolute bottom-0 left-0 right-0 px-6 pb-8">
                     <div className="max-w-4xl mx-auto">
-                        <motion.h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg"
+                        <motion.h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg"
                             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                             {project.title}
                         </motion.h1>
@@ -129,7 +129,7 @@ export default function ProjectDetail() {
                 </motion.div>
 
                 {/* Summary */}
-                <motion.p className="text-xl text-slate-300 leading-relaxed mb-12 border-l-2 border-cyan-accent pl-6"
+                <motion.p className="text-base md:text-xl text-slate-300 leading-relaxed mb-12 border-l-2 border-cyan-accent pl-4 md:pl-6"
                     variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
                     {summary}
                 </motion.p>

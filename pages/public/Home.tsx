@@ -21,7 +21,7 @@ function StaggerContainer({ children, className = '' }: { children: React.ReactN
 
 function Section({ title, id, children, className = '' }: { title: string; id: string; children: React.ReactNode; className?: string }) {
     return (
-        <section id={id} className={`py-24 px-6 max-w-7xl mx-auto ${className}`}>
+        <section id={id} className={`py-14 md:py-24 px-6 max-w-7xl mx-auto ${className}`}>
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-12">
                 <h2 className="text-3xl font-bold inline-block border-b-2 border-cyan-accent pb-2">{title}</h2>
             </motion.div>
@@ -80,7 +80,7 @@ export default function Home() {
     return (
         <>
             {/* Hero */}
-            <header className="pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
+            <header className="pt-24 pb-14 md:pt-32 md:pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
                     className="mb-6 inline-block px-4 py-1.5 rounded-full border border-cyan-accent/30 bg-cyan-accent/5 text-cyan-accent text-xs font-mono uppercase tracking-widest">
                     Available for new opportunities
@@ -97,18 +97,18 @@ export default function Home() {
                 </motion.p>
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                    className="flex flex-wrap justify-center gap-4">
-                    <Link to="/projects" className="bg-cyan-accent text-space-cadet px-8 py-3 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
+                    className="flex flex-col sm:flex-row justify-center gap-3 w-full sm:w-auto">
+                    <Link to="/projects" className="w-full sm:w-auto text-center bg-cyan-accent text-space-cadet px-8 py-3 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
                         View Projects
                     </Link>
-                    <a href="#contact" className="border border-yinmn-blue px-8 py-3 rounded-lg font-bold hover:bg-oxford-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
+                    <a href="#contact" className="w-full sm:w-auto text-center border border-yinmn-blue px-8 py-3 rounded-lg font-bold hover:bg-oxford-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
                         Get In Touch
                     </a>
                 </motion.div>
             </header>
 
             {/* About */}
-            <section id="about" className="py-24 px-6 max-w-7xl mx-auto">
+            <section id="about" className="py-14 md:py-24 px-6 max-w-7xl mx-auto">
                 <div className="grid sm:grid-cols-2 gap-12 items-center">
                     <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
                         <div className="w-full max-w-sm mx-auto rounded-2xl aspect-square bg-oxford-blue border border-yinmn-blue/30 overflow-hidden flex items-center justify-center">

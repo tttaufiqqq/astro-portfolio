@@ -94,6 +94,28 @@ export default function PublicLayout() {
                                         </a>
                                     );
                                 })}
+                                {(profile?.githubUrl || profile?.linkedinUrl || profile?.twitterUrl) && (
+                                    <div className="pt-3 border-t border-yinmn-blue/20 flex items-center gap-5">
+                                        {profile.githubUrl && (
+                                            <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" aria-label="GitHub"
+                                                className="text-slate-400 hover:text-cyan-accent transition-colors">
+                                                <Github size={18} />
+                                            </a>
+                                        )}
+                                        {profile.linkedinUrl && (
+                                            <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
+                                                className="text-slate-400 hover:text-cyan-accent transition-colors">
+                                                <Linkedin size={18} />
+                                            </a>
+                                        )}
+                                        {profile.twitterUrl && (
+                                            <a href={profile.twitterUrl} target="_blank" rel="noopener noreferrer" aria-label="X / Twitter"
+                                                className="text-slate-400 hover:text-cyan-accent transition-colors">
+                                                <X size={18} />
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     )}
@@ -104,8 +126,8 @@ export default function PublicLayout() {
                 <Outlet />
             </main>
 
-            <footer className="bg-oxford-blue py-12 px-6 border-t border-yinmn-blue/20">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <footer className="bg-oxford-blue py-10 md:py-12 px-6 border-t border-yinmn-blue/20">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
                     <div className="text-center md:text-left">
                         <div className="text-cyan-accent font-mono font-bold text-xl mb-2">
                             &lt;tttaufiqqq /&gt;
@@ -140,7 +162,7 @@ export default function PublicLayout() {
                     </div>
                 </div>
 
-                <div className="text-center mt-12 text-slate-500 text-xs">
+                <div className="text-center mt-8 md:mt-12 text-slate-500 text-xs">
                     &copy; {new Date().getFullYear()} tttaufiqqq. All rights reserved.
                 </div>
             </footer>
