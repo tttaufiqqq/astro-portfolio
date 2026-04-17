@@ -25,7 +25,6 @@ app.use(helmet({
       'img-src': ["'self'", 'data:', 'https://taufiqportfolio.blob.core.windows.net', 'https://img.youtube.com', 'https://i.ytimg.com', 'https://i.vimeocdn.com'],
       'frame-src': ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com', 'https://player.vimeo.com'],
       'connect-src': ["'self'", 'https://noembed.com'],
-      'script-src': ["'self'", "'strict-dynamic'"],
     },
   },
 }));
