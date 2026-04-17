@@ -34,6 +34,9 @@ export default function TimelineItem({ experience, isLast }: Props) {
             viewport={{ once: true }}
             className={['relative pl-8', isLast ? 'pb-0' : 'pb-12 border-l border-yinmn-blue/30'].join(' ')}
         >
+            {experience.current && (
+                <span className="absolute left-[-5px] top-2.5 w-2.5 h-2.5 rounded-full bg-cyan-accent/40 animate-ping" />
+            )}
             <div
                 className={[
                     'absolute left-[-5px] top-2.5 w-2.5 h-2.5 rounded-full',

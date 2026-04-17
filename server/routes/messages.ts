@@ -13,7 +13,32 @@ router.post('/', async (req: Request, res: Response) => {
     return;
   }
   const msg = await prisma.message.create({ data: { name, email, message } });
+
+  // Telegram notification — fire-and-forget
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (token && chatId) {
+    const text = `📬 New portfolio message\nFrom: ${name} <${email}>\n\n${message}`;
+    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    }).catch(() => {});
+  }
+
   res.status(201).json(msg);
+});
+
+// Protected — unread count (must be before /:id)
+router.get('/unread-count', requireAuth, async (_req: Request, res: Response) => {
+  const count = await prisma.message.count({ where: { read: false } });
+  res.json({ count });
+});
+
+// Protected — mark all as read
+router.post('/read-all', requireAuth, async (_req: Request, res: Response) => {
+  await prisma.message.updateMany({ where: { read: false }, data: { read: true } });
+  res.status(204).send();
 });
 
 // Protected — admin only

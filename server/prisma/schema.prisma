@@ -74,6 +74,7 @@ model Message {
   name      String   @db.NVarChar(200)
   email     String   @db.NVarChar(200)
   message   String   @db.NVarChar(Max)
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
   @@map("messages")

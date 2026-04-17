@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LogOut, FolderKanban, Wrench, Briefcase, MessageSquare, UserCircle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,6 +14,20 @@ const tabs = [
 
 export default function AdminLayout() {
     const navigate = useNavigate();
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    function refreshUnread() {
+        fetch('/api/messages/unread-count', { credentials: 'include' })
+            .then(r => r.json())
+            .then(data => setUnreadCount(data.count ?? 0))
+            .catch(() => {});
+    }
+
+    useEffect(() => {
+        refreshUnread();
+        window.addEventListener('messages-read', refreshUnread);
+        return () => window.removeEventListener('messages-read', refreshUnread);
+    }, []);
 
     function handleLogout() {
         fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
@@ -41,7 +56,14 @@ export default function AdminLayout() {
                                     }
                                 >
                                     <Icon size={14} />
-                                    <span className="hidden sm:inline">{label}</span>
+                                    <span className="hidden sm:inline relative">
+                                        {label}
+                                        {to === '/admin/messages' && unreadCount > 0 && (
+                                            <span className="absolute -top-2.5 -right-3.5 bg-cyan-accent text-space-cadet text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
+                                                {unreadCount > 9 ? '9+' : unreadCount}
+                                            </span>
+                                        )}
+                                    </span>
                                 </NavLink>
                             ))}
                         </nav>

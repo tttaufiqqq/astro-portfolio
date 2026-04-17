@@ -19,7 +19,14 @@ export default function MessagesTab() {
     useEffect(() => {
         fetch('/api/messages', { credentials: 'include' })
             .then(r => r.json())
-            .then((data: Message[]) => setMessages(data))
+            .then((data: Message[]) => {
+                setMessages(data);
+                if (data.some(m => !m.read)) {
+                    fetch('/api/messages/read-all', { method: 'POST', credentials: 'include' })
+                        .then(() => window.dispatchEvent(new Event('messages-read')))
+                        .catch(() => {});
+                }
+            })
             .catch(() => toast.error('Failed to load messages'))
             .finally(() => setLoading(false));
     }, []);
@@ -67,6 +74,9 @@ export default function MessagesTab() {
                             >
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
+                                        {!msg.read && (
+                                            <span className="w-2 h-2 rounded-full bg-cyan-accent flex-shrink-0" />
+                                        )}
                                         <span className="text-sm font-semibold text-white">{msg.name}</span>
                                         <span className="text-xs text-slate-500">{msg.email}</span>
                                     </div>
