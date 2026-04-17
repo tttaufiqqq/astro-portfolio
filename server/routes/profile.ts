@@ -43,6 +43,12 @@ router.put('/', requireAuth, async (req, res) => {
         };
 
         const existing = await prisma.profile.findFirst();
+        if (existing?.avatarUrl && avatarUrlBody && avatarUrlBody !== existing.avatarUrl) {
+            await deleteFromBlob(existing.avatarUrl);
+        }
+        if (existing?.resumeUrl && resumeUrlBody && resumeUrlBody !== existing.resumeUrl) {
+            await deleteFromBlob(existing.resumeUrl);
+        }
         const profile = existing
             ? await prisma.profile.update({ where: { id: existing.id }, data: updateData })
             : await prisma.profile.create({ data: { name, role, bio, ...updateData } });

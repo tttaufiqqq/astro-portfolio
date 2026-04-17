@@ -67,6 +67,7 @@ export default function ProfileTab() {
         const fd = new FormData();
         fd.append('file', file);
         fd.append('folder', folder);
+        fd.append('name', 'profile');
         const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd });
         if (!res.ok) throw new Error('Upload failed');
         const { url } = await res.json();

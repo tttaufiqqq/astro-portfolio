@@ -90,6 +90,49 @@ describe('PUT /api/profile', () => {
     expect(mockPrisma.profile.create).toHaveBeenCalled();
   });
 
+  it('deletes old avatarUrl from blob when replaced', async () => {
+    const newAvatarUrl = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/avatars/profile-c3d4.jpg';
+    mockPrisma.profile.findFirst.mockResolvedValue(sampleProfile);
+    mockPrisma.profile.update.mockResolvedValue({ ...sampleProfile, avatarUrl: newAvatarUrl });
+    await request(app)
+      .put('/api/profile')
+      .set('Cookie', authCookie())
+      .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', avatarUrl: newAvatarUrl });
+    expect(deleteFromBlob).toHaveBeenCalledWith(sampleProfile.avatarUrl);
+  });
+
+  it('deletes old resumeUrl from blob when replaced', async () => {
+    const newResumeUrl = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/resumes/profile-e5f6.pdf';
+    mockPrisma.profile.findFirst.mockResolvedValue(sampleProfile);
+    mockPrisma.profile.update.mockResolvedValue({ ...sampleProfile, resumeUrl: newResumeUrl });
+    await request(app)
+      .put('/api/profile')
+      .set('Cookie', authCookie())
+      .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', resumeUrl: newResumeUrl });
+    expect(deleteFromBlob).toHaveBeenCalledWith(sampleProfile.resumeUrl);
+  });
+
+  it('does not delete avatarUrl blob when unchanged', async () => {
+    mockPrisma.profile.findFirst.mockResolvedValue(sampleProfile);
+    mockPrisma.profile.update.mockResolvedValue(sampleProfile);
+    await request(app)
+      .put('/api/profile')
+      .set('Cookie', authCookie())
+      .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', avatarUrl: sampleProfile.avatarUrl });
+    expect(deleteFromBlob).not.toHaveBeenCalled();
+  });
+
+  it('does not delete avatarUrl blob when profile has no existing avatar', async () => {
+    mockPrisma.profile.findFirst.mockResolvedValue({ ...sampleProfile, avatarUrl: null });
+    mockPrisma.profile.update.mockResolvedValue(sampleProfile);
+    const newUrl = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/avatars/profile-a1b2.jpg';
+    await request(app)
+      .put('/api/profile')
+      .set('Cookie', authCookie())
+      .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', avatarUrl: newUrl });
+    expect(deleteFromBlob).not.toHaveBeenCalled();
+  });
+
   it('converts empty string URLs to null', async () => {
     mockPrisma.profile.findFirst.mockResolvedValue(sampleProfile);
     mockPrisma.profile.update.mockResolvedValue(sampleProfile);

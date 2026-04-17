@@ -22,7 +22,8 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
             return;
         }
         const folder = typeof req.body.folder === 'string' ? req.body.folder : 'uploads';
-        const url = await uploadToBlob(req.file.buffer, req.file.originalname, req.file.mimetype, folder);
+        const name = typeof req.body.name === 'string' ? req.body.name : undefined;
+        const url = await uploadToBlob(req.file.buffer, req.file.originalname, req.file.mimetype, folder, name);
         res.json({ url });
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

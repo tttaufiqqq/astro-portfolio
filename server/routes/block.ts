@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
+import { deleteFromBlob } from '../lib/blob';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -8,6 +9,12 @@ const prisma = new PrismaClient();
 // PUT /api/blocks/:id — update a block
 router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const { type, order, content, language, imageUrl } = req.body;
+
+    const existing = await prisma.contentBlock.findUnique({ where: { id: Number(req.params.id) } });
+    if (existing?.imageUrl && existing.imageUrl !== imageUrl) {
+        await deleteFromBlob(existing.imageUrl);
+    }
+
     const block = await prisma.contentBlock.update({
         where: { id: Number(req.params.id) },
         data: {
@@ -23,6 +30,8 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 
 // DELETE /api/blocks/:id — delete a block
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
+    const block = await prisma.contentBlock.findUnique({ where: { id: Number(req.params.id) } });
+    if (block?.imageUrl) await deleteFromBlob(block.imageUrl);
     await prisma.contentBlock.delete({ where: { id: Number(req.params.id) } });
     res.status(204).send();
 });

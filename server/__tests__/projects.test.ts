@@ -16,7 +16,13 @@ vi.mock('@prisma/client', () => ({
   PrismaClient: function() { return mockPrisma; },
 }));
 
+vi.mock('../lib/blob', () => ({
+  deleteFromBlob: vi.fn().mockResolvedValue(undefined),
+  uploadToBlob: vi.fn(),
+}));
+
 import app from '../app';
+import { deleteFromBlob } from '../lib/blob';
 
 function authCookie(): string {
   const token = jwt.sign({ admin: true }, 'test-secret', { expiresIn: '1h' });
@@ -132,6 +138,7 @@ describe('PUT /api/projects/:id', () => {
   });
 
   it('updates project', async () => {
+    mockPrisma.project.findUnique.mockResolvedValue(sampleProject);
     const updated = { ...sampleProject, title: 'Updated' };
     mockPrisma.project.update.mockResolvedValue(updated);
     const res = await request(app)
@@ -140,6 +147,39 @@ describe('PUT /api/projects/:id', () => {
       .send({ title: 'Updated', description: 'desc', techStack: 'Vue' });
     expect(res.status).toBe(200);
     expect(res.body.title).toBe('Updated');
+  });
+
+  it('deletes old imageUrl from blob when replaced', async () => {
+    const oldUrl = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/projects/old-a1b2.png';
+    const newUrl = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/projects/new-c3d4.png';
+    mockPrisma.project.findUnique.mockResolvedValue({ ...sampleProject, imageUrl: oldUrl });
+    mockPrisma.project.update.mockResolvedValue({ ...sampleProject, imageUrl: newUrl });
+    await request(app)
+      .put('/api/projects/1')
+      .set('Cookie', authCookie())
+      .send({ title: 'My Project', description: 'desc', techStack: 'React', imageUrl: newUrl });
+    expect(deleteFromBlob).toHaveBeenCalledWith(oldUrl);
+  });
+
+  it('does not delete blob when imageUrl is unchanged', async () => {
+    const url = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/projects/same-a1b2.png';
+    mockPrisma.project.findUnique.mockResolvedValue({ ...sampleProject, imageUrl: url });
+    mockPrisma.project.update.mockResolvedValue({ ...sampleProject, imageUrl: url });
+    await request(app)
+      .put('/api/projects/1')
+      .set('Cookie', authCookie())
+      .send({ title: 'My Project', description: 'desc', techStack: 'React', imageUrl: url });
+    expect(deleteFromBlob).not.toHaveBeenCalled();
+  });
+
+  it('does not delete blob when project has no existing imageUrl', async () => {
+    mockPrisma.project.findUnique.mockResolvedValue({ ...sampleProject, imageUrl: null });
+    mockPrisma.project.update.mockResolvedValue(sampleProject);
+    await request(app)
+      .put('/api/projects/1')
+      .set('Cookie', authCookie())
+      .send({ title: 'My Project', description: 'desc', techStack: 'React' });
+    expect(deleteFromBlob).not.toHaveBeenCalled();
   });
 });
 
@@ -152,11 +192,40 @@ describe('DELETE /api/projects/:id', () => {
   });
 
   it('deletes project and returns 204', async () => {
+    mockPrisma.project.findUnique.mockResolvedValue(sampleProject);
     mockPrisma.project.delete.mockResolvedValue(sampleProject);
     const res = await request(app)
       .delete('/api/projects/1')
       .set('Cookie', authCookie());
     expect(res.status).toBe(204);
+  });
+
+  it('deletes project imageUrl from blob on delete', async () => {
+    const imageUrl = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/projects/my-project-a1b2.png';
+    mockPrisma.project.findUnique.mockResolvedValue({ ...sampleProject, imageUrl, contentBlocks: [] });
+    mockPrisma.project.delete.mockResolvedValue(sampleProject);
+    await request(app).delete('/api/projects/1').set('Cookie', authCookie());
+    expect(deleteFromBlob).toHaveBeenCalledWith(imageUrl);
+  });
+
+  it('deletes block imageUrls from blob on project delete', async () => {
+    const blockImageUrl = 'https://taufiqportfolio.blob.core.windows.net/portfolio-media/blocks/my-project-c3d4.png';
+    mockPrisma.project.findUnique.mockResolvedValue({
+      ...sampleProject,
+      imageUrl: null,
+      contentBlocks: [{ id: 10, imageUrl: blockImageUrl }, { id: 11, imageUrl: null }],
+    });
+    mockPrisma.project.delete.mockResolvedValue(sampleProject);
+    await request(app).delete('/api/projects/1').set('Cookie', authCookie());
+    expect(deleteFromBlob).toHaveBeenCalledWith(blockImageUrl);
+    expect(deleteFromBlob).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips blob delete when project has no imageUrl or block images', async () => {
+    mockPrisma.project.findUnique.mockResolvedValue({ ...sampleProject, imageUrl: null, contentBlocks: [] });
+    mockPrisma.project.delete.mockResolvedValue(sampleProject);
+    await request(app).delete('/api/projects/1').set('Cookie', authCookie());
+    expect(deleteFromBlob).not.toHaveBeenCalled();
   });
 });
 

@@ -71,6 +71,7 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
             const fd = new FormData();
             fd.append('file', file);
             fd.append('folder', 'projects');
+            fd.append('name', form.title);
             const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd });
             if (!res.ok) throw new Error();
             const { url } = await res.json();
