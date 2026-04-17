@@ -7,6 +7,17 @@ import FormField from './FormField';
 import ThemedInput from './ThemedInput';
 import ThemedButton from './ThemedButton';
 import IconPicker from './IconPicker';
+import ThemedSelect from './ThemedSelect';
+
+const SKILL_CATEGORIES = [
+    { value: 'Frontend',  label: 'Frontend'  },
+    { value: 'Backend',   label: 'Backend'   },
+    { value: 'Database',  label: 'Database'  },
+    { value: 'DevOps',    label: 'DevOps'    },
+    { value: 'Mobile',    label: 'Mobile'    },
+    { value: 'Tools',     label: 'Tools'     },
+    { value: 'Other',     label: 'Other'     },
+];
 
 interface Props {
     open: boolean;
@@ -72,8 +83,13 @@ export default function SkillFormModal({ open, onClose, onSaved, skill }: Props)
                     <FormField label="Name" required>
                         <ThemedInput value={form.name} onChange={e => set('name', e.target.value)} required />
                     </FormField>
-                    <FormField label="Category" required hint="e.g. Frontend, Backend, Database">
-                        <ThemedInput value={form.category} onChange={e => set('category', e.target.value)} required />
+                    <FormField label="Category" required>
+                        <ThemedSelect
+                            value={form.category}
+                            onChange={v => set('category', v)}
+                            options={SKILL_CATEGORIES}
+                            placeholder="Select category…"
+                        />
                     </FormField>
                 </div>
 

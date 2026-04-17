@@ -11,6 +11,12 @@ import ThemedTextarea from './ThemedTextarea';
 import ThemedButton from './ThemedButton';
 import FormField from './FormField';
 import { cn } from '@/lib/utils';
+import ThemedSelect from './ThemedSelect';
+
+const HEADING_LEVELS = [
+    { value: '2', label: 'H2 — Section heading'    },
+    { value: '3', label: 'H3 — Subsection heading' },
+];
 
 // ---------------------------------------------------------------------------
 // Types
@@ -213,11 +219,11 @@ function BlockForm({ type, form, onChange }: { type: BlockType; form: AnyForm; o
             return (
                 <div className="space-y-3">
                     <FormField label="Level">
-                        <select value={f.level} onChange={e => set('level', e.target.value)}
-                            className="w-full bg-space-cadet border border-yinmn-blue/30 rounded-lg px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-cyan-accent/50 transition-colors">
-                            <option value="2">H2</option>
-                            <option value="3">H3</option>
-                        </select>
+                        <ThemedSelect
+                            value={f.level}
+                            onChange={v => set('level', v)}
+                            options={HEADING_LEVELS}
+                        />
                     </FormField>
                     <FormField label="Text" required>
                         <ThemedInput value={f.text} onChange={e => set('text', e.target.value)} required />
