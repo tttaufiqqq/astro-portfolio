@@ -50,10 +50,16 @@ export default function Home() {
             .then(r => r.json()).then(setExperiences).catch(() => {});
     }, []);
 
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     async function submitContact(e: React.FormEvent) {
         e.preventDefault();
-        setContactState('sending');
         setContactErrors({});
+        if (!EMAIL_RE.test(contactForm.email)) {
+            setContactErrors({ email: 'Please enter a valid email address.' });
+            return;
+        }
+        setContactState('sending');
         try {
             const res = await fetch('/api/messages', {
                 method: 'POST',

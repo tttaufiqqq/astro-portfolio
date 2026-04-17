@@ -8,12 +8,20 @@ interface FormData {
     message: string;
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Contact() {
     const [data, setData] = useState<FormData>({ name: '', email: '', subject: '', message: '' });
     const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+    const [emailError, setEmailError] = useState('');
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        setEmailError('');
+        if (!EMAIL_RE.test(data.email)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
         setState('sending');
         try {
             const res = await fetch('/api/messages', {
@@ -65,6 +73,7 @@ export default function Contact() {
                             <label className="text-xs font-mono uppercase tracking-wider text-slate-400">Email</label>
                             <input type="email" value={data.email} onChange={e => setData(d => ({ ...d, email: e.target.value }))} required placeholder="you@example.com"
                                 className="w-full bg-space-cadet border border-yinmn-blue/30 rounded-lg px-4 py-3 focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent/40 outline-none transition-colors text-white placeholder-slate-600" />
+                            {emailError && <p className="text-xs text-red-400">{emailError}</p>}
                         </div>
                     </div>
                     <div className="space-y-2">

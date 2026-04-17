@@ -49,6 +49,8 @@ export default function ProjectDetail() {
 
     useEffect(() => {
         if (!slug) return;
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        setLoading(true);
         fetch(`/api/projects/${slug}`)
             .then(r => r.ok ? r.json() : Promise.reject(r.status))
             .then(setData)
