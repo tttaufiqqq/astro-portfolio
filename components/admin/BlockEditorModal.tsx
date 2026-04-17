@@ -185,7 +185,7 @@ function BlockTypePicker({ value, onChange }: { value: BlockType; onChange: (t: 
 // Block inline form
 // ---------------------------------------------------------------------------
 
-function BlockForm({ type, form, onChange }: { type: BlockType; form: AnyForm; onChange: (f: AnyForm) => void }) {
+function BlockForm({ type, form, onChange, projectTitle }: { type: BlockType; form: AnyForm; onChange: (f: AnyForm) => void; projectTitle: string }) {
     const [uploading, setUploading] = useState(false);
     const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -471,6 +471,7 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
                                                         type={block.type}
                                                         form={editForms[block.id]}
                                                         onChange={f => updateEditForm(block.id, f)}
+                                                        projectTitle={projectTitle}
                                                     />
                                                     <div className="flex justify-end gap-2">
                                                         <ThemedButton type="button" variant="secondary"
@@ -510,7 +511,7 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
                             />
                         </div>
 
-                        <BlockForm type={newType} form={newForm} onChange={setNewForm} />
+                        <BlockForm type={newType} form={newForm} onChange={setNewForm} projectTitle={projectTitle} />
 
                         <div className="flex justify-end gap-2">
                             <ThemedButton type="button" variant="secondary" className="px-3 py-1.5 text-xs"
