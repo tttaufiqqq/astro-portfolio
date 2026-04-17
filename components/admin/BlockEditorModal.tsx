@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Pencil, ChevronDown, ChevronUp, Loader2, Check, Upload, X } from 'lucide-react';
+import { Plus, Pencil, ChevronDown, ChevronUp, Loader2, Check, Upload, X, Type, AlignLeft, Image, Video, Code2 } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
@@ -117,6 +117,63 @@ const TYPE_COLORS: Record<BlockType, string> = {
     video:   'bg-orange-500/10 text-orange-400',
     code:    'bg-yellow-500/10 text-yellow-400',
 };
+const TYPE_ICONS: Record<BlockType, React.ReactNode> = {
+    heading: <Type size={12} />,
+    text:    <AlignLeft size={12} />,
+    image:   <Image size={12} />,
+    video:   <Video size={12} />,
+    code:    <Code2 size={12} />,
+};
+
+function BlockTypePicker({ value, onChange }: { value: BlockType; onChange: (t: BlockType) => void }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleOutsideClick(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        document.addEventListener('mousedown', handleOutsideClick);
+        return () => document.removeEventListener('mousedown', handleOutsideClick);
+    }, []);
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                className="flex items-center gap-2 bg-oxford-blue border border-yinmn-blue/30 rounded-lg px-3 py-1.5 hover:border-cyan-accent/50 focus:outline-none focus:border-cyan-accent/50 transition-colors"
+            >
+                <span className={cn('flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium', TYPE_COLORS[value])}>
+                    {TYPE_ICONS[value]}
+                    {TYPE_LABELS[value]}
+                </span>
+                <ChevronDown size={12} className={cn('text-slate-400 transition-transform duration-150', open && 'rotate-180')} />
+            </button>
+
+            {open && (
+                <div className="absolute top-full left-0 mt-1.5 bg-oxford-blue border border-yinmn-blue/30 rounded-xl shadow-2xl z-50 py-1.5 min-w-[140px]">
+                    {(Object.keys(TYPE_LABELS) as BlockType[]).map(t => (
+                        <button
+                            key={t}
+                            type="button"
+                            onClick={() => { onChange(t); setOpen(false); }}
+                            className={cn(
+                                'w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-yinmn-blue/20 transition-colors',
+                                t === value && 'bg-yinmn-blue/10'
+                            )}
+                        >
+                            <span className={cn('flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium', TYPE_COLORS[t])}>
+                                {TYPE_ICONS[t]}
+                                {TYPE_LABELS[t]}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 // ---------------------------------------------------------------------------
 // Block inline form
@@ -440,13 +497,10 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
                         className="bg-space-cadet border border-cyan-accent/20 rounded-xl p-4 space-y-4">
                         <div className="flex items-center gap-3">
                             <span className="text-xs text-cyan-accent font-medium">New block</span>
-                            <select value={newType}
-                                onChange={e => { const t = e.target.value as BlockType; setNewType(t); setNewForm(emptyForm(t)); }}
-                                className="bg-oxford-blue border border-yinmn-blue/30 rounded-lg px-3 py-1.5 text-slate-200 text-sm focus:outline-none focus:border-cyan-accent/50 transition-colors">
-                                {(Object.keys(TYPE_LABELS) as BlockType[]).map(t => (
-                                    <option key={t} value={t}>{TYPE_LABELS[t]}</option>
-                                ))}
-                            </select>
+                            <BlockTypePicker
+                                value={newType}
+                                onChange={t => { setNewType(t); setNewForm(emptyForm(t)); }}
+                            />
                         </div>
 
                         <BlockForm type={newType} form={newForm} onChange={setNewForm} />
