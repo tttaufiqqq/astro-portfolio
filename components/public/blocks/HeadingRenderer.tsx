@@ -13,7 +13,16 @@ export default function HeadingRenderer({ block }: Props) {
     const id = slugify(text);
 
     if (level === 3) {
-        return <h3 id={id} className="text-2xl font-bold text-white pt-2">{text}</h3>;
+        return (
+            <h3 id={id} className="text-xl font-semibold text-slate-100 pt-2 pl-3 border-l-2 border-cyan-accent/50">
+                {text}
+            </h3>
+        );
     }
-    return <h2 id={id} className="text-3xl font-bold text-white pt-4 border-b border-yinmn-blue/30 pb-3">{text}</h2>;
+    return (
+        <h2 id={id} className="text-3xl font-bold text-white pt-4 pb-3 border-b border-yinmn-blue/30 flex items-center gap-3">
+            <span className="w-1 h-7 rounded-full bg-cyan-accent flex-shrink-0" aria-hidden="true" />
+            {text}
+        </h2>
+    );
 }

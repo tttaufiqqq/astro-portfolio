@@ -8,7 +8,7 @@ import VideoRenderer from '@/components/public/blocks/VideoRenderer';
 vi.mock('react-player', async () => {
     const { useState } = await import('react');
 
-    function MockReactPlayer({ url, light, controls }: { url: string; light?: boolean; controls?: boolean }) {
+    function MockReactPlayer({ url, light, controls }: { url: string; light?: boolean | string; controls?: boolean }) {
         const [playing, setPlaying] = useState(false);
 
         if (!url) return null;

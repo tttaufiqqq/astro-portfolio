@@ -44,7 +44,7 @@ export default function VideoRenderer({ block }: Props) {
                             url={url}
                             width="100%"
                             height="100%"
-                            light={!!ytId}
+                            light={ytId ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` : false}
                             controls
                             onError={() => setEmbedError(true)}
                         />
