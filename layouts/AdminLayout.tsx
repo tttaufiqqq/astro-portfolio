@@ -40,9 +40,9 @@ export default function AdminLayout() {
             <div className="min-h-screen bg-space-cadet text-slate-200 font-sans">
                 {/* Top bar */}
                 <header className="sticky top-0 z-40 bg-oxford-blue border-b border-yinmn-blue/30">
-                    <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
+                    <div className="max-w-7xl mx-auto px-6 grid grid-cols-3 items-center h-14">
                         <span className="text-cyan-accent font-bold tracking-wider text-sm">ADMIN</span>
-                        <nav className="flex items-center gap-1">
+                        <nav className="flex items-center justify-center gap-1">
                             {tabs.map(({ to, label, icon: Icon }) => (
                                 <NavLink
                                     key={to}
@@ -67,18 +67,20 @@ export default function AdminLayout() {
                                 </NavLink>
                             ))}
                         </nav>
-                        <a href="/" target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-slate-400 hover:text-cyan-accent transition-colors text-sm">
-                            <ExternalLink size={14} />
-                            <span className="hidden sm:inline">View Site</span>
-                        </a>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-1.5 text-slate-400 hover:text-red-400 transition-colors text-sm"
-                        >
-                            <LogOut size={14} />
-                            <span className="hidden sm:inline">Logout</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                            <a href="/" target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 text-slate-400 hover:text-cyan-accent transition-colors text-sm">
+                                <ExternalLink size={14} />
+                                <span className="hidden sm:inline">View Site</span>
+                            </a>
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-1.5 text-slate-400 hover:text-red-400 transition-colors text-sm"
+                            >
+                                <LogOut size={14} />
+                                <span className="hidden sm:inline">Logout</span>
+                            </button>
+                        </div>
                     </div>
                 </header>
 
