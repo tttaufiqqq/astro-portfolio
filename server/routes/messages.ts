@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { Resend } from 'resend';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Public — contact form
 router.post('/', async (req: Request, res: Response) => {
@@ -23,7 +25,12 @@ router.post('/', async (req: Request, res: Response) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text }),
-    }).catch(() => {});
+    })
+      .then(r => r.json())
+      .then(data => console.log('[Telegram]', JSON.stringify(data)))
+      .catch(err => console.error('[Telegram error]', err));
+  } else {
+    console.warn('[Telegram] missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
   }
 
   res.status(201).json(msg);
@@ -45,6 +52,35 @@ router.post('/read-all', requireAuth, async (_req: Request, res: Response) => {
 router.get('/', requireAuth, async (_req: Request, res: Response) => {
   const messages = await prisma.message.findMany({ orderBy: { createdAt: 'desc' } });
   res.json(messages);
+});
+
+// Protected — reply to a message
+router.post('/:id/reply', requireAuth, async (req: Request, res: Response) => {
+  const { body } = req.body;
+  if (!body) {
+    res.status(400).json({ error: 'body is required' });
+    return;
+  }
+
+  const msg = await prisma.message.findUnique({ where: { id: Number(req.params.id) } });
+  if (!msg) {
+    res.status(404).json({ error: 'Message not found' });
+    return;
+  }
+
+  const { error } = await resend.emails.send({
+    from: process.env.RESEND_FROM ?? 'Portfolio <onboarding@resend.dev>',
+    to: msg.email,
+    subject: `Re: Your message to ${process.env.OWNER_NAME ?? 'me'}`,
+    text: `Hi ${msg.name},\n\n${body}\n\n---\nThis is a reply to your message: "${msg.message}"`,
+  });
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+    return;
+  }
+
+  res.status(204).send();
 });
 
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
