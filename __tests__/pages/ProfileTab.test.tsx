@@ -31,6 +31,8 @@ function stubFetch(profile: typeof baseProfile, deleteOk = true) {
   }));
 }
 
+// ─── Avatar ──────────────────────────────────────────────────────────────────
+
 describe('ProfileTab — avatar', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -38,23 +40,21 @@ describe('ProfileTab — avatar', () => {
     stubFetch({ ...baseProfile, avatarUrl: null });
     render(<ProfileTab />);
     await waitFor(() => expect(screen.getByText('Save Profile')).toBeInTheDocument());
-    // The Remove button for avatar is only rendered when avatarUrl is set
-    const removes = screen.queryAllByRole('button', { name: /remove/i });
-    expect(removes).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: /remove photo/i })).not.toBeInTheDocument();
   });
 
   it('shows Remove photo button when avatarUrl is set', async () => {
     stubFetch({ ...baseProfile, avatarUrl: 'https://blob.example.com/avatar.jpg' });
     render(<ProfileTab />);
     await waitFor(() => expect(screen.getByText('Save Profile')).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /remove photo/i })).toBeInTheDocument();
   });
 
   it('calls DELETE /api/profile/avatar when Remove photo is clicked', async () => {
     stubFetch({ ...baseProfile, avatarUrl: 'https://blob.example.com/avatar.jpg' });
     render(<ProfileTab />);
-    await waitFor(() => expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: /remove/i }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /remove photo/i })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /remove photo/i }));
     await waitFor(() => {
       expect(vi.mocked(fetch)).toHaveBeenCalledWith(
         '/api/profile/avatar',
@@ -66,11 +66,25 @@ describe('ProfileTab — avatar', () => {
   it('hides Remove photo button after successful removal', async () => {
     stubFetch({ ...baseProfile, avatarUrl: 'https://blob.example.com/avatar.jpg' });
     render(<ProfileTab />);
-    await waitFor(() => expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: /remove/i }));
-    await waitFor(() => expect(screen.queryByRole('button', { name: /remove/i })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('button', { name: /remove photo/i })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /remove photo/i }));
+    await waitFor(() => expect(screen.queryByRole('button', { name: /remove photo/i })).not.toBeInTheDocument());
+  });
+
+  it('shows hover overlay with Upload text when no avatar', async () => {
+    stubFetch({ ...baseProfile, avatarUrl: null });
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByRole('button', { name: /upload photo/i })).toBeInTheDocument());
+  });
+
+  it('shows hover overlay with Replace text when avatar is set', async () => {
+    stubFetch({ ...baseProfile, avatarUrl: 'https://blob.example.com/avatar.jpg' });
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByRole('button', { name: /replace photo/i })).toBeInTheDocument());
   });
 });
+
+// ─── Resume ──────────────────────────────────────────────────────────────────
 
 describe('ProfileTab — resume', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -79,26 +93,146 @@ describe('ProfileTab — resume', () => {
     stubFetch({ ...baseProfile, resumeUrl: null });
     render(<ProfileTab />);
     await waitFor(() => expect(screen.getByText('Save Profile')).toBeInTheDocument());
-    expect(screen.queryByRole('button', { name: /remove/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^remove$/i })).not.toBeInTheDocument();
   });
 
-  it('shows Remove resume button when resumeUrl is set', async () => {
+  it('shows View, Replace, Remove inline when resumeUrl is set', async () => {
     stubFetch({ ...baseProfile, resumeUrl: 'https://blob.example.com/cv.pdf' });
     render(<ProfileTab />);
     await waitFor(() => expect(screen.getByText('Save Profile')).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /view/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /replace/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^remove$/i })).toBeInTheDocument();
+  });
+
+  it('View link points to the resume URL', async () => {
+    stubFetch({ ...baseProfile, resumeUrl: 'https://blob.example.com/cv.pdf' });
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByRole('link', { name: /view/i })).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: /view/i })).toHaveAttribute('href', 'https://blob.example.com/cv.pdf');
   });
 
   it('calls DELETE /api/profile/resume when Remove is clicked', async () => {
     stubFetch({ ...baseProfile, resumeUrl: 'https://blob.example.com/cv.pdf' });
     render(<ProfileTab />);
-    await waitFor(() => expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: /remove/i }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /^remove$/i })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
     await waitFor(() => {
       expect(vi.mocked(fetch)).toHaveBeenCalledWith(
         '/api/profile/resume',
         expect.objectContaining({ method: 'DELETE' })
       );
     });
+  });
+
+  it('hides View and Remove after successful removal', async () => {
+    stubFetch({ ...baseProfile, resumeUrl: 'https://blob.example.com/cv.pdf' });
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByRole('button', { name: /^remove$/i })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+    await waitFor(() => {
+      expect(screen.queryByRole('link', { name: /view/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^remove$/i })).not.toBeInTheDocument();
+    });
+  });
+});
+
+// ─── Dirty state ─────────────────────────────────────────────────────────────
+
+describe('ProfileTab — dirty state', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('does NOT show unsaved banner on initial load', async () => {
+    stubFetch(baseProfile);
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByText('Save Profile')).toBeInTheDocument());
+    expect(screen.queryByTestId('unsaved-banner')).not.toBeInTheDocument();
+  });
+
+  it('shows unsaved banner when a field is changed', async () => {
+    stubFetch(baseProfile);
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByDisplayValue('Muhammad Taufiq')).toBeInTheDocument());
+    fireEvent.change(screen.getByDisplayValue('Muhammad Taufiq'), { target: { value: 'Taufiq Edited' } });
+    expect(screen.getByTestId('unsaved-banner')).toBeInTheDocument();
+  });
+
+  it('hides unsaved banner after successful save', async () => {
+    stubFetch(baseProfile);
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByDisplayValue('Muhammad Taufiq')).toBeInTheDocument());
+    fireEvent.change(screen.getByDisplayValue('Muhammad Taufiq'), { target: { value: 'Taufiq Edited' } });
+    expect(screen.getByTestId('unsaved-banner')).toBeInTheDocument();
+    fireEvent.submit(screen.getByRole('button', { name: /save profile/i }).closest('form')!);
+    await waitFor(() => expect(screen.queryByTestId('unsaved-banner')).not.toBeInTheDocument());
+  });
+
+  it('banner disappears when field is reverted to original value', async () => {
+    stubFetch(baseProfile);
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByDisplayValue('Muhammad Taufiq')).toBeInTheDocument());
+    const input = screen.getByDisplayValue('Muhammad Taufiq');
+    fireEvent.change(input, { target: { value: 'Taufiq Edited' } });
+    expect(screen.getByTestId('unsaved-banner')).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: 'Muhammad Taufiq' } });
+    expect(screen.queryByTestId('unsaved-banner')).not.toBeInTheDocument();
+  });
+});
+
+// ─── Bio character count ─────────────────────────────────────────────────────
+
+describe('ProfileTab — bio character count', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('shows character count for loaded bio', async () => {
+    stubFetch({ ...baseProfile, bio: 'IT undergrad at UTeM' });
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByTestId('bio-char-count')).toBeInTheDocument());
+    expect(screen.getByTestId('bio-char-count')).toHaveTextContent('20 / 500');
+  });
+
+  it('updates character count as user types', async () => {
+    stubFetch({ ...baseProfile, bio: '' });
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByTestId('bio-char-count')).toHaveTextContent('0 / 500'));
+    fireEvent.change(screen.getByPlaceholderText(/tell visitors/i), { target: { value: 'Hello' } });
+    expect(screen.getByTestId('bio-char-count')).toHaveTextContent('5 / 500');
+  });
+
+  it('shows count in red when at max length', async () => {
+    const longBio = 'a'.repeat(500);
+    stubFetch({ ...baseProfile, bio: longBio });
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByTestId('bio-char-count')).toHaveTextContent('500 / 500'));
+    expect(screen.getByTestId('bio-char-count')).toHaveClass('text-red-400');
+  });
+});
+
+// ─── Social icons ────────────────────────────────────────────────────────────
+
+describe('ProfileTab — social link icons', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('renders GitHub, LinkedIn, X labels', async () => {
+    stubFetch(baseProfile);
+    render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByText('Save Profile')).toBeInTheDocument());
+    expect(screen.getByText(/github url/i)).toBeInTheDocument();
+    expect(screen.getByText(/linkedin url/i)).toBeInTheDocument();
+    expect(screen.getByText(/x \(twitter\) url/i)).toBeInTheDocument();
+  });
+});
+
+// ─── Section separators ──────────────────────────────────────────────────────
+
+describe('ProfileTab — section separators', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('renders horizontal rule separators', async () => {
+    stubFetch(baseProfile);
+    const { container } = render(<ProfileTab />);
+    await waitFor(() => expect(screen.getByText('Save Profile')).toBeInTheDocument());
+    const hrs = container.querySelectorAll('hr');
+    expect(hrs.length).toBeGreaterThanOrEqual(3);
   });
 });

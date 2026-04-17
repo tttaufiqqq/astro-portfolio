@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Upload, User, X } from 'lucide-react';
+import { Loader2, Upload, User, X, ExternalLink } from 'lucide-react';
+import { SiGithub, SiX } from 'react-icons/si';
+import { FaLinkedinIn } from 'react-icons/fa';
 import { toast } from 'sonner';
 import type { Profile } from '@/types/models';
 import FormField from '@/components/admin/FormField';
@@ -17,24 +19,38 @@ interface FormState {
 }
 
 const empty: FormState = { name: '', role: '', bio: '', githubUrl: '', linkedinUrl: '', twitterUrl: '' };
+const BIO_MAX = 500;
 
 export default function ProfileTab() {
     const [form, setForm] = useState<FormState>(empty);
+    const [savedForm, setSavedForm] = useState<FormState>(empty);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [resumeUrl, setResumeUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [uploadingResume, setUploadingResume] = useState(false);
+    const [avatarHovered, setAvatarHovered] = useState(false);
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const resumeInputRef = useRef<HTMLInputElement>(null);
+
+    const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm);
 
     useEffect(() => {
         fetch('/api/profile')
             .then(r => r.json())
             .then((p: Profile) => {
-                setForm({ name: p.name, role: p.role, bio: p.bio, githubUrl: p.githubUrl ?? '', linkedinUrl: p.linkedinUrl ?? '', twitterUrl: p.twitterUrl ?? '' });
+                const loaded: FormState = {
+                    name: p.name,
+                    role: p.role,
+                    bio: p.bio,
+                    githubUrl: p.githubUrl ?? '',
+                    linkedinUrl: p.linkedinUrl ?? '',
+                    twitterUrl: p.twitterUrl ?? '',
+                };
+                setForm(loaded);
+                setSavedForm(loaded);
                 setAvatarUrl(p.avatarUrl);
                 setResumeUrl(p.resumeUrl);
             })
@@ -129,6 +145,7 @@ export default function ProfileTab() {
                 }),
             });
             if (!res.ok) throw new Error();
+            setSavedForm(form);
             toast.success('Profile updated');
         } catch {
             toast.error('Failed to save profile');
@@ -147,37 +164,74 @@ export default function ProfileTab() {
 
     return (
         <div className="max-w-2xl">
-            <h1 className="text-2xl font-bold text-slate-100 mb-8">Profile</h1>
+            <h1 className="text-2xl font-bold text-slate-100 mb-6">Profile</h1>
 
-            <form onSubmit={handleSave} className="space-y-6">
-                {/* Avatar */}
+            {/* Unsaved changes banner */}
+            {isDirty && (
+                <div
+                    data-testid="unsaved-banner"
+                    className="sticky top-14 z-30 -mx-6 px-6 py-2.5 mb-6 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-between"
+                >
+                    <span className="text-xs text-amber-400 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block" />
+                        Unsaved changes
+                    </span>
+                    <button
+                        type="submit"
+                        form="profile-form"
+                        disabled={saving}
+                        className="text-xs text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-50"
+                    >
+                        Save now →
+                    </button>
+                </div>
+            )}
+
+            <form id="profile-form" onSubmit={handleSave} className="space-y-6">
+                {/* Avatar — hover overlay */}
                 <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-2xl bg-oxford-blue border border-yinmn-blue/30 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <div
+                        className="relative w-28 h-28 rounded-2xl bg-oxford-blue border border-yinmn-blue/30 overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer"
+                        onMouseEnter={() => setAvatarHovered(true)}
+                        onMouseLeave={() => setAvatarHovered(false)}
+                        onClick={() => avatarInputRef.current?.click()}
+                        role="button"
+                        aria-label={avatarUrl ? 'Replace photo' : 'Upload photo'}
+                    >
                         {avatarUrl
                             ? <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                            : <User size={32} className="text-slate-500" />
+                            : <User size={36} className="text-slate-500" />
                         }
+                        {/* Hover overlay */}
+                        <div className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-1 transition-opacity duration-150 ${avatarHovered ? 'opacity-100' : 'opacity-0'}`}>
+                            {uploadingAvatar
+                                ? <Loader2 size={18} className="animate-spin text-white" />
+                                : <Upload size={18} className="text-white" />
+                            }
+                            <span className="text-white text-[10px] font-medium">
+                                {uploadingAvatar ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
+                            </span>
+                        </div>
+                        <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
                     </div>
                     <div className="space-y-2">
                         <p className="text-sm text-slate-400">Profile photo</p>
-                        <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
-                        <div className="flex items-center gap-2">
-                            <button type="button" disabled={uploadingAvatar} onClick={() => avatarInputRef.current?.click()}
-                                className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
-                                {uploadingAvatar ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                                {uploadingAvatar ? 'Uploading…' : avatarUrl ? 'Replace photo' : 'Upload photo'}
-                            </button>
-                            {avatarUrl && (
-                                <button type="button" onClick={removeAvatar}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-red-400 hover:border-red-400/40 transition-colors">
-                                    <X size={14} /> Remove
-                                </button>
-                            )}
-                        </div>
                         <p className="text-xs text-slate-600">JPEG, PNG, WebP — max 5MB</p>
+                        {avatarUrl && (
+                            <button
+                                type="button"
+                                onClick={removeAvatar}
+                                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-400 transition-colors"
+                            >
+                                <X size={12} /> Remove photo
+                            </button>
+                        )}
                     </div>
                 </div>
 
+                <hr className="border-yinmn-blue/20" />
+
+                {/* Identity */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Name" required>
                         <ThemedInput value={form.name} onChange={e => set('name', e.target.value)} required />
@@ -187,29 +241,57 @@ export default function ProfileTab() {
                     </FormField>
                 </div>
 
-                <FormField label="Bio">
-                    <ThemedTextarea value={form.bio} onChange={e => set('bio', e.target.value)} rows={4} placeholder="Tell visitors about yourself…" />
-                </FormField>
+                {/* Bio with character count */}
+                <div className="space-y-1">
+                    <FormField label="Bio">
+                        <ThemedTextarea
+                            value={form.bio}
+                            onChange={e => set('bio', e.target.value)}
+                            rows={4}
+                            placeholder="Tell visitors about yourself…"
+                            maxLength={BIO_MAX}
+                        />
+                    </FormField>
+                    <p
+                        data-testid="bio-char-count"
+                        className={`text-xs text-right ${form.bio.length >= BIO_MAX ? 'text-red-400' : 'text-slate-600'}`}
+                    >
+                        {form.bio.length} / {BIO_MAX}
+                    </p>
+                </div>
+
+                <hr className="border-yinmn-blue/20" />
 
                 {/* Resume */}
                 <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-300">Resume / CV</p>
-                    {resumeUrl && (
-                        <a href={resumeUrl} target="_blank" rel="noopener noreferrer"
-                            className="inline-block text-xs text-cyan-accent hover:underline mb-1">
-                            View current resume
-                        </a>
-                    )}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <input ref={resumeInputRef} type="file" accept="application/pdf" className="hidden" onChange={handleResumeChange} />
-                        <button type="button" disabled={uploadingResume} onClick={() => resumeInputRef.current?.click()}
-                            className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50">
+                        {resumeUrl && (
+                            <a
+                                href={resumeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-cyan-accent hover:border-cyan-accent/40 transition-colors"
+                            >
+                                <ExternalLink size={14} /> View
+                            </a>
+                        )}
+                        <button
+                            type="button"
+                            disabled={uploadingResume}
+                            onClick={() => resumeInputRef.current?.click()}
+                            className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-slate-200 hover:border-cyan-accent/40 transition-colors disabled:opacity-50"
+                        >
                             {uploadingResume ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                            {uploadingResume ? 'Uploading…' : resumeUrl ? 'Replace resume' : 'Upload resume'}
+                            {uploadingResume ? 'Uploading…' : resumeUrl ? 'Replace' : 'Upload resume'}
                         </button>
                         {resumeUrl && (
-                            <button type="button" onClick={removeResume}
-                                className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-red-400 hover:border-red-400/40 transition-colors">
+                            <button
+                                type="button"
+                                onClick={removeResume}
+                                className="flex items-center gap-2 px-4 py-2 text-sm border border-yinmn-blue/40 rounded-lg text-slate-400 hover:text-red-400 hover:border-red-400/40 transition-colors"
+                            >
                                 <X size={14} /> Remove
                             </button>
                         )}
@@ -217,15 +299,18 @@ export default function ProfileTab() {
                     <p className="text-xs text-slate-600">PDF only — max 5MB</p>
                 </div>
 
+                <hr className="border-yinmn-blue/20" />
+
+                {/* Social Links */}
                 <div className="space-y-3">
                     <p className="text-sm font-medium text-slate-300">Social Links</p>
-                    <FormField label="GitHub URL">
+                    <FormField label={<span className="flex items-center gap-2"><SiGithub size={14} className="text-slate-400" /> GitHub URL</span>}>
                         <ThemedInput type="url" value={form.githubUrl} onChange={e => set('githubUrl', e.target.value)} placeholder="https://github.com/…" />
                     </FormField>
-                    <FormField label="LinkedIn URL">
+                    <FormField label={<span className="flex items-center gap-2"><FaLinkedinIn size={14} className="text-slate-400" /> LinkedIn URL</span>}>
                         <ThemedInput type="url" value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/in/…" />
                     </FormField>
-                    <FormField label="Twitter / X URL">
+                    <FormField label={<span className="flex items-center gap-2"><SiX size={14} className="text-slate-400" /> X (Twitter) URL</span>}>
                         <ThemedInput type="url" value={form.twitterUrl} onChange={e => set('twitterUrl', e.target.value)} placeholder="https://x.com/…" />
                     </FormField>
                 </div>

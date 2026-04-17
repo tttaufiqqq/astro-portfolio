@@ -1,5 +1,5 @@
 interface Props {
-    label: string;
+    label: React.ReactNode;
     required?: boolean;
     error?: string;
     hint?: string;
