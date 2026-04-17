@@ -83,4 +83,20 @@
         background-color: #6fffe9;
         color: #0b132b;
     }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #0b132b;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #3a506b;
+        border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #6fffe9;
+    }
 }
