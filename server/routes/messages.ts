@@ -75,31 +75,38 @@ router.get('/', requireAuth, async (_req: Request, res: Response) => {
 
 // Protected — reply to a message
 router.post('/:id/reply', requireAuth, async (req: Request, res: Response) => {
-  const { body } = req.body;
-  if (!body) {
-    res.status(400).json({ error: 'body is required' });
-    return;
+  try {
+    const { body } = req.body;
+    if (!body) {
+      res.status(400).json({ error: 'body is required' });
+      return;
+    }
+
+    const msg = await prisma.message.findUnique({ where: { id: Number(req.params.id) } });
+    if (!msg) {
+      res.status(404).json({ error: 'Message not found' });
+      return;
+    }
+
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM ?? 'Portfolio <onboarding@resend.dev>',
+      to: msg.email,
+      subject: `Re: Your message to ${process.env.OWNER_NAME ?? 'me'}`,
+      text: `Hi ${msg.name},\n\n${body}\n\n---\nThis is a reply to your message: "${msg.message}"`,
+    });
+
+    if (error) {
+      console.error('[Reply] Resend error:', JSON.stringify(error));
+      res.status(500).json({ error: error.message });
+      return;
+    }
+
+    console.log('[Reply] Sent:', data?.id);
+    res.status(204).send();
+  } catch (err) {
+    console.error('[Reply] Unexpected error:', err);
+    res.status(500).json({ error: 'Failed to send reply' });
   }
-
-  const msg = await prisma.message.findUnique({ where: { id: Number(req.params.id) } });
-  if (!msg) {
-    res.status(404).json({ error: 'Message not found' });
-    return;
-  }
-
-  const { error } = await resend.emails.send({
-    from: process.env.RESEND_FROM ?? 'Portfolio <onboarding@resend.dev>',
-    to: msg.email,
-    subject: `Re: Your message to ${process.env.OWNER_NAME ?? 'me'}`,
-    text: `Hi ${msg.name},\n\n${body}\n\n---\nThis is a reply to your message: "${msg.message}"`,
-  });
-
-  if (error) {
-    res.status(500).json({ error: error.message });
-    return;
-  }
-
-  res.status(204).send();
 });
 
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
