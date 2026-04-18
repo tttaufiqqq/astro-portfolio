@@ -1,93 +1,46 @@
 import { Router } from 'express';
-import prisma from '../lib/prisma';
 import { requireAuth } from '../middleware/auth';
-import { deleteFile } from '../lib/storage';
 import { requireFields } from '../lib/validate';
+import * as profile from '../services/profile';
 
 const router = Router();
 
-// GET /api/profile — public
-router.get('/', async (_req, res) => {
+router.get('/', async (_req, res, next) => {
     try {
-        let profile = await prisma.profile.findFirst();
-        if (!profile) {
-            profile = await prisma.profile.create({
-                data: {
-                    name: 'Muhammad Taufiq',
-                    role: 'Software Engineer & Full-Stack Developer',
-                    bio: 'IT undergrad at UTeM, building full-stack web and IoT solutions. Passionate about clean code, scalable architecture, and shipping things that work.',
-                },
-            });
-        }
-        res.json(profile);
+        res.json(await profile.getOrCreateProfile());
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to fetch profile' });
+        next(err);
     }
 });
 
-// PUT /api/profile — protected
-router.put('/', requireAuth, async (req, res) => {
+router.put('/', requireAuth, async (req, res, next) => {
     try {
         if (!requireFields(res, req.body, ['name'])) return;
-        const { name, role, bio, githubUrl, linkedinUrl, twitterUrl, avatarUrl: avatarUrlBody, resumeUrl: resumeUrlBody } = req.body;
-
-        const updateData: Record<string, string | null> = {
-            name,
-            role,
-            bio,
-            githubUrl: githubUrl || null,
-            linkedinUrl: linkedinUrl || null,
-            twitterUrl: twitterUrl || null,
-            avatarUrl: avatarUrlBody || null,
-            resumeUrl: resumeUrlBody || null,
-        };
-
-        const existing = await prisma.profile.findFirst();
-        if (existing?.avatarUrl && avatarUrlBody && avatarUrlBody !== existing.avatarUrl) {
-            await deleteFile(existing.avatarUrl);
-        }
-        if (existing?.resumeUrl && resumeUrlBody && resumeUrlBody !== existing.resumeUrl) {
-            await deleteFile(existing.resumeUrl);
-        }
-        const profile = existing
-            ? await prisma.profile.update({ where: { id: existing.id }, data: updateData })
-            : await prisma.profile.create({ data: { name, role, bio, ...updateData } });
-
-        res.json(profile);
+        res.json(await profile.updateProfile(req.body));
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to update profile' });
+        next(err);
     }
 });
 
-// DELETE /api/profile/resume — protected
-router.delete('/resume', requireAuth, async (_req, res) => {
+router.delete('/resume', requireAuth, async (_req, res, next) => {
     try {
-        const profile = await prisma.profile.findFirst();
-        if (profile?.resumeUrl) {
-            await deleteFile(profile.resumeUrl);
-            await prisma.profile.update({ where: { id: profile.id }, data: { resumeUrl: null } });
-        }
+        await profile.removeResume();
         res.json({ ok: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to remove resume' });
+        next(err);
     }
 });
 
-// DELETE /api/profile/avatar — protected
-router.delete('/avatar', requireAuth, async (_req, res) => {
+router.delete('/avatar', requireAuth, async (_req, res, next) => {
     try {
-        const profile = await prisma.profile.findFirst();
-        if (profile?.avatarUrl) {
-            await deleteFile(profile.avatarUrl);
-            await prisma.profile.update({ where: { id: profile.id }, data: { avatarUrl: null } });
-        }
+        await profile.removeAvatar();
         res.json({ ok: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to remove avatar' });
+        next(err);
     }
 });
 
