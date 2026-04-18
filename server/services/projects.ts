@@ -46,8 +46,8 @@ export async function getProjectBySlug(slug: string) {
 export async function createProject(data: {
     title: string;
     summary?: string;
-    description?: string;
-    techStack?: string;
+    description: string;
+    techStack: string;
     githubUrl?: string;
     demoUrl?: string;
     imageUrl?: string;

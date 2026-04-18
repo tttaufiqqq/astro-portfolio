@@ -9,7 +9,7 @@ interface ExperienceData {
     role: string;
     startDate: Date;
     endDate: Date | null;
-    description?: string;
+    description: string;
     current?: boolean;
     order?: number;
 }
