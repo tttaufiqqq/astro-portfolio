@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
 import { deleteFile } from '../lib/storage';
 import { requireFields } from '../lib/validate';
+import { serializeBlock } from '../lib/blocks';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -30,7 +31,10 @@ router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
             orderBy: { order: 'asc' },
             include: { contentBlocks: { orderBy: { order: 'asc' } } },
         });
-        res.json(projects);
+        res.json(projects.map(p => ({
+            ...p,
+            contentBlocks: p.contentBlocks.map(serializeBlock),
+        })));
     } catch (err) {
         next(err);
     }
@@ -54,7 +58,14 @@ router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => 
         const prev = idx > 0 ? all[idx - 1] : null;
         const next = idx < all.length - 1 ? all[idx + 1] : null;
 
-        res.json({ project, prev, next });
+        res.json({
+            project: {
+                ...project,
+                contentBlocks: project.contentBlocks.map(serializeBlock),
+            },
+            prev,
+            next,
+        });
     } catch (err) {
         next(err);
     }

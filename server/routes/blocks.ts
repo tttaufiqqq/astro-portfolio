@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
 import { requireFields, isValidBlockType } from '../lib/validate';
 import { sanitizeBlockContent } from '../lib/sanitize';
+import { serializeBlock } from '../lib/blocks';
 
 const router = Router({ mergeParams: true });
 const prisma = new PrismaClient();
@@ -14,7 +15,7 @@ router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunct
             where: { projectId: Number(req.params.projectId) },
             orderBy: { order: 'asc' },
         });
-        res.json(blocks);
+        res.json(blocks.map(serializeBlock));
     } catch (err) {
         next(err);
     }
