@@ -58,7 +58,7 @@ export async function replyToMessage(id: number, body: string) {
         text: `Reply to: ${msg.name} <${msg.email}>\n\n${body}\n\n---\nOriginal message: "${msg.message}"`,
     });
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     console.log('[Reply] Sent:', data?.id);
     return { sent: true };
 }
