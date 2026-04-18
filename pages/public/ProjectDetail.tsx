@@ -8,13 +8,10 @@ import ImageRenderer from '@/components/public/blocks/ImageRenderer';
 import TextRenderer from '@/components/public/blocks/TextRenderer';
 import VideoRenderer from '@/components/public/blocks/VideoRenderer';
 import type { Project, ContentBlock, HeadingBlock } from '@/types/models';
+import { projects as projectsApi } from '@/api';
 
-interface NavItem { id: number; title: string; slug: string; }
-interface ProjectResponse {
-    project: Project;
-    prev: NavItem | null;
-    next: NavItem | null;
-}
+import type { ProjectDetailResponse } from '@/api/projects';
+type ProjectResponse = ProjectDetailResponse;
 
 function slugify(text: string): string {
     return text.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
@@ -51,8 +48,7 @@ export default function ProjectDetail() {
         if (!slug) return;
         window.scrollTo({ top: 0, behavior: 'instant' });
         setLoading(true);
-        fetch(`/api/projects/${slug}`)
-            .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        projectsApi.get(slug)
             .then(setData)
             .catch(() => {})
             .finally(() => setLoading(false));

@@ -6,6 +6,7 @@ import ProjectCard from '@/components/public/ProjectCard';
 import SkillBadge from '@/components/public/SkillBadge';
 import TimelineItem from '@/components/public/TimelineItem';
 import type { Project, Skill, Experience, Profile } from '@/types/models';
+import { profile as profileApi, projects as projectsApi, skills as skillsApi, experiences as experiencesApi, messages as messagesApi, ApiError } from '@/api';
 
 function StaggerContainer({ children, className = '' }: { children: React.ReactNode; className?: string }) {
     const container = {
@@ -41,13 +42,10 @@ export default function Home() {
     const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        fetch('/api/profile').then(r => r.json()).then(setProfile).catch(() => {});
-        fetch('/api/projects?featured=true&status=published')
-            .then(r => r.json()).then(setFeaturedProjects).catch(() => {});
-        fetch('/api/skills')
-            .then(r => r.json()).then(setSkills).catch(() => {});
-        fetch('/api/experiences')
-            .then(r => r.json()).then(setExperiences).catch(() => {});
+        profileApi.get().then(setProfile).catch(() => {});
+        projectsApi.list({ featured: true, status: 'published' }).then(setFeaturedProjects).catch(() => {});
+        skillsApi.list().then(setSkills).catch(() => {});
+        experiencesApi.list().then(setExperiences).catch(() => {});
     }, []);
 
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -61,19 +59,14 @@ export default function Home() {
         }
         setContactState('sending');
         try {
-            const res = await fetch('/api/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(contactForm),
-            });
-            if (res.ok) {
-                setContactState('sent');
-                setContactForm({ name: '', email: '', message: '' });
-            } else {
-                setContactState('error');
-            }
-        } catch {
+            await messagesApi.send(contactForm);
+            setContactState('sent');
+            setContactForm({ name: '', email: '', message: '' });
+        } catch (err) {
             setContactState('error');
+            if (err instanceof ApiError) {
+                setContactErrors({ _: err.message });
+            }
         }
     }
 

@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { auth } from '@/api';
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
     const [checking, setChecking] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('/api/auth/check', { credentials: 'include' })
-            .then(r => r.json())
-            .then((data: { authenticated: boolean }) => {
+        auth.check()
+            .then(data => {
                 if (!data.authenticated) navigate('/admin/login', { replace: true });
                 else setChecking(false);
             })
