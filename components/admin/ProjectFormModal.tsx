@@ -124,7 +124,7 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
                         <ThemedInput value={form.title} onChange={e => set('title', e.target.value)} required />
                     </FormField>
                     <FormField label="Order" hint="Position in the list">
-                        <ThemedInput type="number" value={form.order} onChange={e => set('order', e.target.value)} />
+                        <ThemedInput type="number" min="0" value={form.order} onChange={e => set('order', e.target.value)} onKeyDown={e => e.preventDefault()} />
                     </FormField>
                 </div>
 

@@ -6,7 +6,7 @@ import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -85,6 +85,12 @@ router.post('/:id/reply', requireAuth, async (req: Request, res: Response) => {
     const msg = await prisma.message.findUnique({ where: { id: Number(req.params.id) } });
     if (!msg) {
       res.status(404).json({ error: 'Message not found' });
+      return;
+    }
+
+    if (!resend) {
+      console.warn('[Reply] RESEND_API_KEY not set — skipping email in dev');
+      res.status(204).send();
       return;
     }
 

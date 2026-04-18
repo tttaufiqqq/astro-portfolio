@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
-import { deleteFromBlob } from '../lib/blob';
+import { deleteFile } from '../lib/storage';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -44,10 +44,10 @@ router.put('/', requireAuth, async (req, res) => {
 
         const existing = await prisma.profile.findFirst();
         if (existing?.avatarUrl && avatarUrlBody && avatarUrlBody !== existing.avatarUrl) {
-            await deleteFromBlob(existing.avatarUrl);
+            await deleteFile(existing.avatarUrl);
         }
         if (existing?.resumeUrl && resumeUrlBody && resumeUrlBody !== existing.resumeUrl) {
-            await deleteFromBlob(existing.resumeUrl);
+            await deleteFile(existing.resumeUrl);
         }
         const profile = existing
             ? await prisma.profile.update({ where: { id: existing.id }, data: updateData })
@@ -65,7 +65,7 @@ router.delete('/resume', requireAuth, async (_req, res) => {
     try {
         const profile = await prisma.profile.findFirst();
         if (profile?.resumeUrl) {
-            await deleteFromBlob(profile.resumeUrl);
+            await deleteFile(profile.resumeUrl);
             await prisma.profile.update({ where: { id: profile.id }, data: { resumeUrl: null } });
         }
         res.json({ ok: true });
@@ -80,7 +80,7 @@ router.delete('/avatar', requireAuth, async (_req, res) => {
     try {
         const profile = await prisma.profile.findFirst();
         if (profile?.avatarUrl) {
-            await deleteFromBlob(profile.avatarUrl);
+            await deleteFile(profile.avatarUrl);
             await prisma.profile.update({ where: { id: profile.id }, data: { avatarUrl: null } });
         }
         res.json({ ok: true });

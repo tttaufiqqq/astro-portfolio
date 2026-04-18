@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
 
 import authRouter from './routes/auth';
 import projectsRouter from './routes/projects';
@@ -23,7 +24,7 @@ app.use(helmet({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       'script-src': ["'self'", 'https://www.youtube.com'],
-      'img-src': ["'self'", 'data:', 'https://taufiqportfolio.blob.core.windows.net', 'https://img.youtube.com', 'https://i.ytimg.com', 'https://i.vimeocdn.com'],
+      'img-src': ["'self'", 'data:', 'https://taufiqportfolio.blob.core.windows.net', 'https://img.youtube.com', 'https://i.ytimg.com', 'https://i.vimeocdn.com', ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:8080'] : [])],
       'frame-src': ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com', 'https://player.vimeo.com'],
       'connect-src': ["'self'", 'https://noembed.com'],
     },
@@ -32,6 +33,11 @@ app.use(helmet({
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+if (process.env.NODE_ENV !== 'production') {
+  const uploadDir = process.env.LOCAL_UPLOAD_DIR ?? 'uploads';
+  app.use('/uploads', express.static(path.resolve(uploadDir)));
+}
 
 app.use('/api/auth', authRouter);
 app.use('/api/projects', projectsRouter);

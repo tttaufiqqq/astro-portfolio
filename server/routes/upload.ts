@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { requireAuth } from '../middleware/auth';
-import { uploadToBlob } from '../lib/blob';
+import { upload as storageUpload } from '../lib/storage';
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
         }
         const folder = typeof req.body.folder === 'string' ? req.body.folder : 'uploads';
         const name = typeof req.body.name === 'string' ? req.body.name : undefined;
-        const url = await uploadToBlob(req.file.buffer, req.file.originalname, req.file.mimetype, folder, name);
+        const url = await storageUpload(req.file.buffer, req.file.originalname, req.file.mimetype, folder, name);
         res.json({ url });
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
