@@ -148,6 +148,72 @@ describe('POST /api/messages/:id/reply', () => {
   });
 });
 
+describe('POST /api/messages — validation', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns 400 for invalid email format', async () => {
+    const res = await request(app)
+      .post('/api/messages')
+      .send({ name: 'Alice', email: 'not-an-email', message: 'Hello!' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Invalid email/);
+  });
+
+  it('returns 400 when message exceeds 5000 characters', async () => {
+    const res = await request(app)
+      .post('/api/messages')
+      .send({ name: 'Alice', email: 'alice@example.com', message: 'x'.repeat(5001) });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/5000/);
+  });
+
+  it('accepts message at exactly 5000 characters', async () => {
+    mockPrisma.message.create.mockResolvedValue(sampleMessage);
+    const res = await request(app)
+      .post('/api/messages')
+      .send({ name: 'Alice', email: 'alice@example.com', message: 'x'.repeat(5000) });
+    expect(res.status).toBe(201);
+  });
+});
+
+describe('GET /api/messages/unread-count', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns 401 without auth', async () => {
+    const res = await request(app).get('/api/messages/unread-count');
+    expect(res.status).toBe(401);
+  });
+
+  it('returns unread count', async () => {
+    mockPrisma.message.count.mockResolvedValue(3);
+    const res = await request(app)
+      .get('/api/messages/unread-count')
+      .set('Cookie', authCookie());
+    expect(res.status).toBe(200);
+    expect(res.body.count).toBe(3);
+  });
+});
+
+describe('POST /api/messages/read-all', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns 401 without auth', async () => {
+    const res = await request(app).post('/api/messages/read-all');
+    expect(res.status).toBe(401);
+  });
+
+  it('marks all messages as read and returns 204', async () => {
+    mockPrisma.message.updateMany.mockResolvedValue({ count: 2 });
+    const res = await request(app)
+      .post('/api/messages/read-all')
+      .set('Cookie', authCookie());
+    expect(res.status).toBe(204);
+    expect(mockPrisma.message.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { read: true } })
+    );
+  });
+});
+
 describe('DELETE /api/messages/:id', () => {
   beforeEach(() => vi.clearAllMocks());
 

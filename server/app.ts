@@ -1,8 +1,9 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
 
 import authRouter from './routes/auth';
 import projectsRouter from './routes/projects';
@@ -18,12 +19,22 @@ dotenv.config();
 
 const app = express();
 
+if (process.env.NODE_ENV !== 'test') {
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      console.log(`[${req.method}] ${req.path} → ${res.statusCode} (${Date.now() - start}ms)`);
+    });
+    next();
+  });
+}
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       'script-src': ["'self'", 'https://www.youtube.com'],
-      'img-src': ["'self'", 'data:', 'https://taufiqportfolio.blob.core.windows.net', 'https://img.youtube.com', 'https://i.ytimg.com', 'https://i.vimeocdn.com'],
+      'img-src': ["'self'", 'data:', 'https://taufiqportfolio.blob.core.windows.net', 'https://img.youtube.com', 'https://i.ytimg.com', 'https://i.vimeocdn.com', ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:8080'] : [])],
       'frame-src': ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com', 'https://player.vimeo.com'],
       'connect-src': ["'self'", 'https://noembed.com'],
     },
@@ -32,6 +43,11 @@ app.use(helmet({
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+if (process.env.NODE_ENV !== 'production') {
+  const uploadDir = process.env.LOCAL_UPLOAD_DIR ?? 'uploads';
+  app.use('/uploads', express.static(path.resolve(uploadDir)));
+}
 
 app.use('/api/auth', authRouter);
 app.use('/api/projects', projectsRouter);
@@ -42,5 +58,11 @@ app.use('/api/messages', messagesRouter);
 app.use('/api/blocks', blockRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/profile', profileRouter);
+
+// Global error handler — catches any error passed to next(err)
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  console.error(`[Error] ${req.method} ${req.path} —`, err.stack ?? err.message);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 export default app;

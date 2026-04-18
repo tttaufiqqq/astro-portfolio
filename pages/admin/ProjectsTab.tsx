@@ -4,6 +4,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
 import type { Project } from '@/types/models';
+import { projects as projectsApi } from '@/api';
 import SortableRow from '@/components/admin/SortableRow';
 import ConfirmDelete from '@/components/admin/ConfirmDelete';
 import ThemedButton from '@/components/admin/ThemedButton';
@@ -20,9 +21,8 @@ export default function ProjectsTab() {
     const sensors = useSensors(useSensor(PointerSensor));
 
     useEffect(() => {
-        fetch('/api/projects', { credentials: 'include' })
-            .then(r => r.json())
-            .then((data: Project[]) => setProjects(data))
+        projectsApi.list()
+            .then(setProjects)
             .catch(() => toast.error('Failed to load projects'))
             .finally(() => setLoading(false));
     }, []);
@@ -34,12 +34,8 @@ export default function ProjectsTab() {
         const newIndex = projects.findIndex(p => p.id === over.id);
         const reordered = arrayMove(projects, oldIndex, newIndex);
         setProjects(reordered);
-        fetch('/api/projects/reorder', {
-            method: 'PATCH',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reordered.map((p, i) => ({ id: p.id, order: i + 1 }))),
-        }).catch(() => toast.error('Reorder failed'));
+        projectsApi.reorder(reordered.map((p, i) => ({ id: p.id, order: i + 1 })))
+            .catch(() => toast.error('Reorder failed'));
     }
 
     function handleSaved(saved: Project) {
@@ -55,9 +51,8 @@ export default function ProjectsTab() {
     }
 
     function handleDelete(id: number) {
-        fetch(`/api/projects/${id}`, { method: 'DELETE', credentials: 'include' })
-            .then(r => {
-                if (!r.ok) throw new Error();
+        projectsApi.remove(id)
+            .then(() => {
                 setProjects(prev => prev.filter(p => p.id !== id));
                 toast.success('Project deleted');
             })

@@ -7,6 +7,7 @@ import FormField from './FormField';
 import ThemedInput from './ThemedInput';
 import ThemedTextarea from './ThemedTextarea';
 import ThemedButton from './ThemedButton';
+import ThemedSelect from './ThemedSelect';
 
 interface Props {
     open: boolean;
@@ -28,6 +29,25 @@ interface FormState {
     order: string;
 }
 
+interface FormErrors {
+    title?: string;
+    description?: string;
+    techStack?: string;
+}
+
+function validate(form: FormState): FormErrors {
+    const e: FormErrors = {};
+    if (!form.title.trim()) e.title = 'Title is required';
+    if (!form.description.trim()) e.description = 'Description is required';
+    if (!form.techStack.trim()) e.techStack = 'Tech stack is required';
+    return e;
+}
+
+const STATUS_OPTIONS = [
+    { value: 'draft',     label: 'Draft'     },
+    { value: 'published', label: 'Published' },
+];
+
 const empty: FormState = {
     title: '', summary: '', description: '', techStack: '',
     githubUrl: '', demoUrl: '', imageUrl: '',
@@ -36,11 +56,13 @@ const empty: FormState = {
 
 export default function ProjectFormModal({ open, onClose, onSaved, project }: Props) {
     const [form, setForm] = useState<FormState>(empty);
+    const [errors, setErrors] = useState<FormErrors>({});
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const imageInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        setErrors({});
         if (project) {
             setForm({
                 title: project.title,
@@ -61,6 +83,7 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
 
     function set(key: keyof FormState, value: string | boolean) {
         setForm(f => ({ ...f, [key]: value }));
+        if (key in errors) setErrors(e => ({ ...e, [key]: undefined }));
     }
 
     async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -86,6 +109,8 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        const errs = validate(form);
+        if (Object.keys(errs).length > 0) { setErrors(errs); return; }
         setSaving(true);
         const body = {
             ...form,
@@ -118,13 +143,13 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
 
     return (
         <ModalShell open={open} onClose={onClose} title={project ? 'Edit Project' : 'New Project'} maxWidth="2xl">
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField label="Title" required>
-                        <ThemedInput value={form.title} onChange={e => set('title', e.target.value)} required />
+                    <FormField label="Title" required error={errors.title}>
+                        <ThemedInput value={form.title} onChange={e => set('title', e.target.value)} error={errors.title} />
                     </FormField>
                     <FormField label="Order" hint="Position in the list">
-                        <ThemedInput type="number" value={form.order} onChange={e => set('order', e.target.value)} />
+                        <ThemedInput type="number" min="0" value={form.order} onChange={e => set('order', e.target.value)} onKeyDown={e => e.preventDefault()} />
                     </FormField>
                 </div>
 
@@ -132,12 +157,12 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
                     <ThemedInput value={form.summary} onChange={e => set('summary', e.target.value)} />
                 </FormField>
 
-                <FormField label="Description" required>
-                    <ThemedTextarea value={form.description} onChange={e => set('description', e.target.value)} rows={4} required />
+                <FormField label="Description" required error={errors.description}>
+                    <ThemedTextarea value={form.description} onChange={e => set('description', e.target.value)} rows={4} error={errors.description} />
                 </FormField>
 
-                <FormField label="Tech Stack" hint="Comma-separated: React, TypeScript, Node.js" required>
-                    <ThemedInput value={form.techStack} onChange={e => set('techStack', e.target.value)} placeholder="React, TypeScript, Node.js" required />
+                <FormField label="Tech Stack" hint="Comma-separated: React, TypeScript, Node.js" required error={errors.techStack}>
+                    <ThemedInput value={form.techStack} onChange={e => set('techStack', e.target.value)} placeholder="React, TypeScript, Node.js" error={errors.techStack} />
                 </FormField>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -179,14 +204,11 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Status">
-                        <select
+                        <ThemedSelect
                             value={form.status}
-                            onChange={e => set('status', e.target.value as 'draft' | 'published')}
-                            className="w-full bg-space-cadet border border-yinmn-blue/30 rounded-lg px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-cyan-accent/50 transition-colors"
-                        >
-                            <option value="draft">Draft</option>
-                            <option value="published">Published</option>
-                        </select>
+                            onChange={v => set('status', v as 'draft' | 'published')}
+                            options={STATUS_OPTIONS}
+                        />
                     </FormField>
 
                     <FormField label="Featured">

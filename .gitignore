@@ -26,3 +26,7 @@ pnpm-debug.log*
 # TypeScript build artifacts
 tsconfig.tsbuildinfo
 server/tsconfig.tsbuildinfo
+
+# local dev uploads
+server/uploads/*
+!server/uploads/.gitkeep

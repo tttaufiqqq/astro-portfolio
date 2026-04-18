@@ -12,9 +12,10 @@ interface Props {
     onChange: (value: string) => void;
     options: Option[];
     placeholder?: string;
+    error?: string;
 }
 
-export default function ThemedSelect({ value, onChange, options, placeholder = 'Select…' }: Props) {
+export default function ThemedSelect({ value, onChange, options, placeholder = 'Select…', error }: Props) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -33,7 +34,12 @@ export default function ThemedSelect({ value, onChange, options, placeholder = '
             <button
                 type="button"
                 onClick={() => setOpen(o => !o)}
-                className="w-full flex items-center justify-between gap-2 bg-space-cadet border border-yinmn-blue/30 rounded-lg px-4 py-3 text-sm text-left focus:outline-none focus:border-cyan-accent/50 transition-colors duration-200"
+                className={cn(
+                    'w-full flex items-center justify-between gap-2 bg-space-cadet border rounded-lg px-4 py-3 text-sm text-left focus:outline-none transition-colors duration-200',
+                    error
+                        ? 'border-red-500/60 focus:border-red-500/80'
+                        : 'border-yinmn-blue/30 focus:border-cyan-accent/50',
+                )}
             >
                 <span className={selected ? 'text-slate-200' : 'text-slate-500'}>
                     {selected ? selected.label : placeholder}

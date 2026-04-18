@@ -16,13 +16,13 @@ vi.mock('@prisma/client', () => ({
   PrismaClient: function() { return mockPrisma; },
 }));
 
-vi.mock('../lib/blob', () => ({
-  deleteFromBlob: vi.fn().mockResolvedValue(undefined),
-  uploadToBlob: vi.fn(),
+vi.mock('../lib/storage', () => ({
+  deleteFile: vi.fn().mockResolvedValue(undefined),
+  upload: vi.fn(),
 }));
 
 import app from '../app';
-import { deleteFromBlob } from '../lib/blob';
+import { deleteFile } from '../lib/storage';
 
 function authCookie(): string {
   const token = jwt.sign({ admin: true }, 'test-secret', { expiresIn: '1h' });
@@ -158,7 +158,7 @@ describe('PUT /api/projects/:id', () => {
       .put('/api/projects/1')
       .set('Cookie', authCookie())
       .send({ title: 'My Project', description: 'desc', techStack: 'React', imageUrl: newUrl });
-    expect(deleteFromBlob).toHaveBeenCalledWith(oldUrl);
+    expect(deleteFile).toHaveBeenCalledWith(oldUrl);
   });
 
   it('does not delete blob when imageUrl is unchanged', async () => {
@@ -169,7 +169,7 @@ describe('PUT /api/projects/:id', () => {
       .put('/api/projects/1')
       .set('Cookie', authCookie())
       .send({ title: 'My Project', description: 'desc', techStack: 'React', imageUrl: url });
-    expect(deleteFromBlob).not.toHaveBeenCalled();
+    expect(deleteFile).not.toHaveBeenCalled();
   });
 
   it('does not delete blob when project has no existing imageUrl', async () => {
@@ -179,7 +179,7 @@ describe('PUT /api/projects/:id', () => {
       .put('/api/projects/1')
       .set('Cookie', authCookie())
       .send({ title: 'My Project', description: 'desc', techStack: 'React' });
-    expect(deleteFromBlob).not.toHaveBeenCalled();
+    expect(deleteFile).not.toHaveBeenCalled();
   });
 });
 
@@ -205,7 +205,7 @@ describe('DELETE /api/projects/:id', () => {
     mockPrisma.project.findUnique.mockResolvedValue({ ...sampleProject, imageUrl, contentBlocks: [] });
     mockPrisma.project.delete.mockResolvedValue(sampleProject);
     await request(app).delete('/api/projects/1').set('Cookie', authCookie());
-    expect(deleteFromBlob).toHaveBeenCalledWith(imageUrl);
+    expect(deleteFile).toHaveBeenCalledWith(imageUrl);
   });
 
   it('deletes block imageUrls from blob on project delete', async () => {
@@ -217,15 +217,15 @@ describe('DELETE /api/projects/:id', () => {
     });
     mockPrisma.project.delete.mockResolvedValue(sampleProject);
     await request(app).delete('/api/projects/1').set('Cookie', authCookie());
-    expect(deleteFromBlob).toHaveBeenCalledWith(blockImageUrl);
-    expect(deleteFromBlob).toHaveBeenCalledTimes(1);
+    expect(deleteFile).toHaveBeenCalledWith(blockImageUrl);
+    expect(deleteFile).toHaveBeenCalledTimes(1);
   });
 
   it('skips blob delete when project has no imageUrl or block images', async () => {
     mockPrisma.project.findUnique.mockResolvedValue({ ...sampleProject, imageUrl: null, contentBlocks: [] });
     mockPrisma.project.delete.mockResolvedValue(sampleProject);
     await request(app).delete('/api/projects/1').set('Cookie', authCookie());
-    expect(deleteFromBlob).not.toHaveBeenCalled();
+    expect(deleteFile).not.toHaveBeenCalled();
   });
 });
 

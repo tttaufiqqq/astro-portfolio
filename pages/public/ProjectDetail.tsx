@@ -8,33 +8,22 @@ import ImageRenderer from '@/components/public/blocks/ImageRenderer';
 import TextRenderer from '@/components/public/blocks/TextRenderer';
 import VideoRenderer from '@/components/public/blocks/VideoRenderer';
 import type { Project, ContentBlock, HeadingBlock } from '@/types/models';
+import { projects as projectsApi } from '@/api';
 
-interface NavItem { id: number; title: string; slug: string; }
-interface ProjectResponse {
-    project: Project;
-    prev: NavItem | null;
-    next: NavItem | null;
-}
+import type { ProjectDetailResponse } from '@/api/projects';
+type ProjectResponse = ProjectDetailResponse;
 
 function slugify(text: string): string {
     return text.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
 }
 
-function parseContent(block: ContentBlock): ContentBlock {
-    if (typeof block.content === 'string') {
-        return { ...block, content: JSON.parse(block.content) };
-    }
-    return block;
-}
-
 function renderBlock(block: ContentBlock) {
-    const b = parseContent(block);
-    switch (b.type) {
-        case 'heading': return <HeadingRenderer key={b.id} block={b} />;
-        case 'text':    return <TextRenderer key={b.id} block={b} />;
-        case 'image':   return <ImageRenderer key={b.id} block={b} />;
-        case 'video':   return <VideoRenderer key={b.id} block={b} />;
-        case 'code':    return <CodeRenderer key={b.id} block={b} />;
+    switch (block.type) {
+        case 'heading': return <HeadingRenderer key={block.id} block={block} />;
+        case 'text':    return <TextRenderer key={block.id} block={block} />;
+        case 'image':   return <ImageRenderer key={block.id} block={block} />;
+        case 'video':   return <VideoRenderer key={block.id} block={block} />;
+        case 'code':    return <CodeRenderer key={block.id} block={block} />;
         default:        return null;
     }
 }
@@ -51,8 +40,7 @@ export default function ProjectDetail() {
         if (!slug) return;
         window.scrollTo({ top: 0, behavior: 'instant' });
         setLoading(true);
-        fetch(`/api/projects/${slug}`)
-            .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        projectsApi.get(slug)
             .then(setData)
             .catch(() => {})
             .finally(() => setLoading(false));
@@ -74,7 +62,7 @@ export default function ProjectDetail() {
     const blocks: ContentBlock[] = project.contentBlocks ?? [];
     const techStack = project.tech_stack ?? (project.techStack ? project.techStack.split(',').map(t => t.trim()) : []);
     const summary = project.summary ?? project.description;
-    const headings = blocks.map(parseContent).filter((b): b is HeadingBlock => b.type === 'heading');
+    const headings = blocks.filter((b): b is HeadingBlock => b.type === 'heading');
     const hasToc = headings.length >= 2;
 
     return (

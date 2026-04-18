@@ -35,11 +35,25 @@ interface FormState {
 
 const empty: FormState = { name: '', category: '', icon: '', order: '0' };
 
+interface FormErrors {
+    name?: string;
+    category?: string;
+}
+
+function validate(form: FormState): FormErrors {
+    const e: FormErrors = {};
+    if (!form.name.trim()) e.name = 'Name is required';
+    if (!form.category) e.category = 'Category is required';
+    return e;
+}
+
 export default function SkillFormModal({ open, onClose, onSaved, skill }: Props) {
     const [form, setForm] = useState<FormState>(empty);
+    const [errors, setErrors] = useState<FormErrors>({});
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
+        setErrors({});
         if (skill) {
             setForm({ name: skill.name, category: skill.category, icon: skill.icon ?? '', order: String(skill.order) });
         } else {
@@ -49,10 +63,13 @@ export default function SkillFormModal({ open, onClose, onSaved, skill }: Props)
 
     function set(key: keyof FormState, value: string) {
         setForm(f => ({ ...f, [key]: value }));
+        if (key in errors) setErrors(e => ({ ...e, [key]: undefined }));
     }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        const errs = validate(form);
+        if (Object.keys(errs).length > 0) { setErrors(errs); return; }
         setSaving(true);
         const body = { ...form, order: parseInt(form.order, 10) || 0, icon: form.icon || null };
         try {
@@ -78,17 +95,18 @@ export default function SkillFormModal({ open, onClose, onSaved, skill }: Props)
 
     return (
         <ModalShell open={open} onClose={onClose} title={skill ? 'Edit Skill' : 'New Skill'}>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField label="Name" required>
-                        <ThemedInput value={form.name} onChange={e => set('name', e.target.value)} required />
+                    <FormField label="Name" required error={errors.name}>
+                        <ThemedInput value={form.name} onChange={e => set('name', e.target.value)} error={errors.name} />
                     </FormField>
-                    <FormField label="Category" required>
+                    <FormField label="Category" required error={errors.category}>
                         <ThemedSelect
                             value={form.category}
                             onChange={v => set('category', v)}
                             options={SKILL_CATEGORIES}
                             placeholder="Select category…"
+                            error={errors.category}
                         />
                     </FormField>
                 </div>

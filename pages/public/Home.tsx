@@ -6,6 +6,7 @@ import ProjectCard from '@/components/public/ProjectCard';
 import SkillBadge from '@/components/public/SkillBadge';
 import TimelineItem from '@/components/public/TimelineItem';
 import type { Project, Skill, Experience, Profile } from '@/types/models';
+import { profile as profileApi, projects as projectsApi, skills as skillsApi, experiences as experiencesApi, messages as messagesApi, ApiError } from '@/api';
 
 function StaggerContainer({ children, className = '' }: { children: React.ReactNode; className?: string }) {
     const container = {
@@ -41,39 +42,37 @@ export default function Home() {
     const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        fetch('/api/profile').then(r => r.json()).then(setProfile).catch(() => {});
-        fetch('/api/projects?featured=true&status=published')
-            .then(r => r.json()).then(setFeaturedProjects).catch(() => {});
-        fetch('/api/skills')
-            .then(r => r.json()).then(setSkills).catch(() => {});
-        fetch('/api/experiences')
-            .then(r => r.json()).then(setExperiences).catch(() => {});
+        profileApi.get().then(setProfile).catch(() => {});
+        projectsApi.list({ featured: true, status: 'published' }).then(setFeaturedProjects).catch(() => {});
+        skillsApi.list().then(setSkills).catch(() => {});
+        experiencesApi.list().then(setExperiences).catch(() => {});
     }, []);
 
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    function setContactField(key: keyof typeof contactForm, value: string) {
+        setContactForm(f => ({ ...f, [key]: value }));
+        if (key in contactErrors) setContactErrors(e => ({ ...e, [key]: undefined }));
+    }
+
     async function submitContact(e: React.FormEvent) {
         e.preventDefault();
-        setContactErrors({});
-        if (!EMAIL_RE.test(contactForm.email)) {
-            setContactErrors({ email: 'Please enter a valid email address.' });
-            return;
-        }
+        const errs: Record<string, string> = {};
+        if (!contactForm.name.trim()) errs.name = 'Name is required';
+        if (!contactForm.email.trim()) errs.email = 'Email is required';
+        else if (!EMAIL_RE.test(contactForm.email)) errs.email = 'Please enter a valid email address';
+        if (!contactForm.message.trim()) errs.message = 'Message is required';
+        if (Object.keys(errs).length > 0) { setContactErrors(errs); return; }
         setContactState('sending');
         try {
-            const res = await fetch('/api/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(contactForm),
-            });
-            if (res.ok) {
-                setContactState('sent');
-                setContactForm({ name: '', email: '', message: '' });
-            } else {
-                setContactState('error');
-            }
-        } catch {
+            await messagesApi.send(contactForm);
+            setContactState('sent');
+            setContactForm({ name: '', email: '', message: '' });
+        } catch (err) {
             setContactState('error');
+            if (err instanceof ApiError) {
+                setContactErrors({ _: err.message });
+            }
         }
     }
 
@@ -185,25 +184,25 @@ export default function Home() {
                             Message sent! I'll be in touch soon.
                         </motion.div>
                     ) : (
-                        <form onSubmit={submitContact} className="space-y-4">
+                        <form onSubmit={submitContact} noValidate className="space-y-4">
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="grid gap-1.5">
                                     <label className="text-sm text-slate-400">Name</label>
-                                    <input type="text" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} required placeholder="Your name"
-                                        className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 focus:ring-1 focus:ring-cyan-accent/30 transition-colors" />
+                                    <input type="text" value={contactForm.name} onChange={e => setContactField('name', e.target.value)} placeholder="Your name"
+                                        className={`bg-oxford-blue border rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-0 transition-colors ${contactErrors.name ? 'border-red-500/60 focus:border-red-500/80' : 'border-yinmn-blue/40 focus:border-cyan-accent/60'}`} />
                                     {contactErrors.name && <p className="text-xs text-red-400">{contactErrors.name}</p>}
                                 </div>
                                 <div className="grid gap-1.5">
                                     <label className="text-sm text-slate-400">Email</label>
-                                    <input type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} required placeholder="your@email.com"
-                                        className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 focus:ring-1 focus:ring-cyan-accent/30 transition-colors" />
+                                    <input type="email" value={contactForm.email} onChange={e => setContactField('email', e.target.value)} placeholder="your@email.com"
+                                        className={`bg-oxford-blue border rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-0 transition-colors ${contactErrors.email ? 'border-red-500/60 focus:border-red-500/80' : 'border-yinmn-blue/40 focus:border-cyan-accent/60'}`} />
                                     {contactErrors.email && <p className="text-xs text-red-400">{contactErrors.email}</p>}
                                 </div>
                             </div>
                             <div className="grid gap-1.5">
                                 <label className="text-sm text-slate-400">Message</label>
-                                <textarea rows={4} value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} required placeholder="What's on your mind?"
-                                    className="bg-oxford-blue border border-yinmn-blue/40 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-accent/60 focus:ring-1 focus:ring-cyan-accent/30 transition-colors resize-none" />
+                                <textarea rows={4} value={contactForm.message} onChange={e => setContactField('message', e.target.value)} placeholder="What's on your mind?"
+                                    className={`bg-oxford-blue border rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-0 transition-colors resize-none ${contactErrors.message ? 'border-red-500/60 focus:border-red-500/80' : 'border-yinmn-blue/40 focus:border-cyan-accent/60'}`} />
                                 {contactErrors.message && <p className="text-xs text-red-400">{contactErrors.message}</p>}
                             </div>
                             {contactState === 'error' && <p className="text-sm text-red-400">Something went wrong. Please try again.</p>}

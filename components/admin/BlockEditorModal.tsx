@@ -29,7 +29,7 @@ interface AdminBlock {
     projectId: number;
     type: BlockType;
     order: number;
-    content: string;    // raw JSON string from DB
+    content: Record<string, unknown>;
     language: string | null;
     imageUrl: string | null;
 }
@@ -52,12 +52,8 @@ interface Props {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function safeParse(raw: string): Record<string, unknown> {
-    try { return JSON.parse(raw); } catch { return {}; }
-}
-
 function blockToForm(block: AdminBlock): AnyForm {
-    const c = safeParse(block.content);
+    const c = block.content;
     switch (block.type) {
         case 'heading': return { text: String(c.text ?? ''), level: String(c.level ?? '2') as '2' | '3' };
         case 'text':    return { html: String(c.html ?? '') };
@@ -92,6 +88,18 @@ function formToPayload(type: BlockType, form: AnyForm): { content: object; langu
     }
 }
 
+function validateBlockForm(type: BlockType, form: AnyForm): Record<string, string> {
+    const e: Record<string, string> = {};
+    switch (type) {
+        case 'heading': if (!(form as HeadingForm).text.trim()) e.text = 'Heading text is required'; break;
+        case 'text':    if (!(form as TextForm).html.trim()) e.html = 'Content is required'; break;
+        case 'image':   if (!(form as ImageForm).imageUrl) e.imageUrl = 'An image is required'; break;
+        case 'video':   if (!(form as VideoForm).url.trim()) e.url = 'Video URL is required'; break;
+        case 'code':    if (!(form as CodeForm).code.trim()) e.code = 'Code is required'; break;
+    }
+    return e;
+}
+
 function emptyForm(type: BlockType): AnyForm {
     switch (type) {
         case 'heading': return { text: '', level: '2' };
@@ -103,7 +111,7 @@ function emptyForm(type: BlockType): AnyForm {
 }
 
 function contentPreview(block: AdminBlock): string {
-    const c = safeParse(block.content);
+    const c = block.content;
     switch (block.type) {
         case 'heading': return `H${c.level ?? 2}: ${c.text ?? ''}`;
         case 'text':    return String(c.html ?? '').replace(/<[^>]+>/g, '').slice(0, 80) || '(empty)';
@@ -185,7 +193,7 @@ function BlockTypePicker({ value, onChange }: { value: BlockType; onChange: (t: 
 // Block inline form
 // ---------------------------------------------------------------------------
 
-function BlockForm({ type, form, onChange, projectTitle }: { type: BlockType; form: AnyForm; onChange: (f: AnyForm) => void; projectTitle: string }) {
+function BlockForm({ type, form, onChange, projectTitle, errors = {} }: { type: BlockType; form: AnyForm; onChange: (f: AnyForm) => void; projectTitle: string; errors?: Record<string, string> }) {
     const [uploading, setUploading] = useState(false);
     const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -220,14 +228,10 @@ function BlockForm({ type, form, onChange, projectTitle }: { type: BlockType; fo
             return (
                 <div className="space-y-3">
                     <FormField label="Level">
-                        <ThemedSelect
-                            value={f.level}
-                            onChange={v => set('level', v)}
-                            options={HEADING_LEVELS}
-                        />
+                        <ThemedSelect value={f.level} onChange={v => set('level', v)} options={HEADING_LEVELS} />
                     </FormField>
-                    <FormField label="Text" required>
-                        <ThemedInput value={f.text} onChange={e => set('text', e.target.value)} required />
+                    <FormField label="Text" required error={errors.text}>
+                        <ThemedInput value={f.text} onChange={e => set('text', e.target.value)} error={errors.text} />
                     </FormField>
                 </div>
             );
@@ -235,8 +239,8 @@ function BlockForm({ type, form, onChange, projectTitle }: { type: BlockType; fo
         case 'text': {
             const f = form as TextForm;
             return (
-                <FormField label="Content" hint="Supports HTML — e.g. <strong>bold</strong>, <a href='…'>link</a>">
-                    <ThemedTextarea value={f.html} onChange={e => set('html', e.target.value)} rows={5} />
+                <FormField label="Content" hint="Supports HTML — e.g. <strong>bold</strong>, <a href='…'>link</a>" error={errors.html}>
+                    <ThemedTextarea value={f.html} onChange={e => set('html', e.target.value)} rows={5} error={errors.html} />
                 </FormField>
             );
         }
@@ -284,8 +288,8 @@ function BlockForm({ type, form, onChange, projectTitle }: { type: BlockType; fo
             const f = form as VideoForm;
             return (
                 <div className="space-y-3">
-                    <FormField label="Video URL" required>
-                        <ThemedInput type="url" value={f.url} onChange={e => set('url', e.target.value)} placeholder="https://youtube.com/… or direct mp4" required />
+                    <FormField label="Video URL" required error={errors.url}>
+                        <ThemedInput type="url" value={f.url} onChange={e => set('url', e.target.value)} placeholder="https://youtube.com/… or direct mp4" error={errors.url} />
                     </FormField>
                     <FormField label="Caption">
                         <ThemedInput value={f.caption} onChange={e => set('caption', e.target.value)} />
@@ -300,9 +304,9 @@ function BlockForm({ type, form, onChange, projectTitle }: { type: BlockType; fo
                     <FormField label="Language">
                         <ThemedInput value={f.language} onChange={e => set('language', e.target.value)} placeholder="typescript, python, bash…" />
                     </FormField>
-                    <FormField label="Code" required>
+                    <FormField label="Code" required error={errors.code}>
                         <ThemedTextarea value={f.code} onChange={e => set('code', e.target.value)} rows={8}
-                            className="font-mono text-xs" required />
+                            className="font-mono text-xs" error={errors.code} />
                     </FormField>
                 </div>
             );
@@ -323,6 +327,8 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
 
     const [newType, setNewType] = useState<BlockType>('text');
     const [newForm, setNewForm] = useState<AnyForm>(emptyForm('text'));
+    const [newFormErrors, setNewFormErrors] = useState<Record<string, string>>({});
+    const [editBlockErrors, setEditBlockErrors] = useState<Record<number, Record<string, string>>>({});
     const [addingNew, setAddingNew] = useState(false);
     const [savingNew, setSavingNew] = useState(false);
 
@@ -362,6 +368,8 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
     async function handleSave(block: AdminBlock) {
         const form = editForms[block.id];
         if (!form) return;
+        const errs = validateBlockForm(block.type, form);
+        if (Object.keys(errs).length > 0) { setEditBlockErrors(prev => ({ ...prev, [block.id]: errs })); return; }
         setSavingId(block.id);
         const { content, language, imageUrl } = formToPayload(block.type, form);
         try {
@@ -408,6 +416,8 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
 
     async function handleAddBlock(e: React.FormEvent) {
         e.preventDefault();
+        const errs = validateBlockForm(newType, newForm);
+        if (Object.keys(errs).length > 0) { setNewFormErrors(errs); return; }
         setSavingNew(true);
         const { content, language, imageUrl } = formToPayload(newType, newForm);
         try {
@@ -470,8 +480,9 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
                                                     <BlockForm
                                                         type={block.type}
                                                         form={editForms[block.id]}
-                                                        onChange={f => updateEditForm(block.id, f)}
+                                                        onChange={f => { updateEditForm(block.id, f); setEditBlockErrors(prev => ({ ...prev, [block.id]: {} })); }}
                                                         projectTitle={projectTitle}
+                                                        errors={editBlockErrors[block.id]}
                                                     />
                                                     <div className="flex justify-end gap-2">
                                                         <ThemedButton type="button" variant="secondary"
@@ -507,11 +518,11 @@ export default function BlockEditorModal({ open, onClose, projectId, projectTitl
                             <span className="text-xs text-cyan-accent font-medium">New block</span>
                             <BlockTypePicker
                                 value={newType}
-                                onChange={t => { setNewType(t); setNewForm(emptyForm(t)); }}
+                                onChange={t => { setNewType(t); setNewForm(emptyForm(t)); setNewFormErrors({}); }}
                             />
                         </div>
 
-                        <BlockForm type={newType} form={newForm} onChange={setNewForm} projectTitle={projectTitle} />
+                        <BlockForm type={newType} form={newForm} onChange={f => { setNewForm(f); setNewFormErrors({}); }} projectTitle={projectTitle} errors={newFormErrors} />
 
                         <div className="flex justify-end gap-2">
                             <ThemedButton type="button" variant="secondary" className="px-3 py-1.5 text-xs"
