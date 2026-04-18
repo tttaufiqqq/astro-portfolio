@@ -7,6 +7,7 @@ import FormField from './FormField';
 import ThemedInput from './ThemedInput';
 import ThemedTextarea from './ThemedTextarea';
 import ThemedButton from './ThemedButton';
+import ThemedSelect from './ThemedSelect';
 
 interface Props {
     open: boolean;
@@ -27,6 +28,11 @@ interface FormState {
     status: 'draft' | 'published';
     order: string;
 }
+
+const STATUS_OPTIONS = [
+    { value: 'draft',     label: 'Draft'     },
+    { value: 'published', label: 'Published' },
+];
 
 const empty: FormState = {
     title: '', summary: '', description: '', techStack: '',
@@ -179,14 +185,11 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Status">
-                        <select
+                        <ThemedSelect
                             value={form.status}
-                            onChange={e => set('status', e.target.value as 'draft' | 'published')}
-                            className="w-full bg-space-cadet border border-yinmn-blue/30 rounded-lg px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-cyan-accent/50 transition-colors"
-                        >
-                            <option value="draft">Draft</option>
-                            <option value="published">Published</option>
-                        </select>
+                            onChange={v => set('status', v as 'draft' | 'published')}
+                            options={STATUS_OPTIONS}
+                        />
                     </FormField>
 
                     <FormField label="Featured">

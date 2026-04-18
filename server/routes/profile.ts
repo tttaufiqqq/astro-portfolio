@@ -9,7 +9,6 @@ router.get('/', async (_req, res, next) => {
     try {
         res.json(await profile.getOrCreateProfile());
     } catch (err) {
-        console.error(err);
         next(err);
     }
 });
@@ -19,7 +18,6 @@ router.put('/', requireAuth, async (req, res, next) => {
         if (!requireFields(res, req.body, ['name'])) return;
         res.json(await profile.updateProfile(req.body));
     } catch (err) {
-        console.error(err);
         next(err);
     }
 });
@@ -29,7 +27,6 @@ router.delete('/resume', requireAuth, async (_req, res, next) => {
         await profile.removeResume();
         res.json({ ok: true });
     } catch (err) {
-        console.error(err);
         next(err);
     }
 });
@@ -39,7 +36,6 @@ router.delete('/avatar', requireAuth, async (_req, res, next) => {
         await profile.removeAvatar();
         res.json({ ok: true });
     } catch (err) {
-        console.error(err);
         next(err);
     }
 });

@@ -19,6 +19,16 @@ dotenv.config();
 
 const app = express();
 
+if (process.env.NODE_ENV !== 'test') {
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      console.log(`[${req.method}] ${req.path} → ${res.statusCode} (${Date.now() - start}ms)`);
+    });
+    next();
+  });
+}
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -50,8 +60,8 @@ app.use('/api/upload', uploadRouter);
 app.use('/api/profile', profileRouter);
 
 // Global error handler — catches any error passed to next(err)
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[Error]', err.stack ?? err.message);
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  console.error(`[Error] ${req.method} ${req.path} —`, err.stack ?? err.message);
   res.status(500).json({ error: 'Internal server error' });
 });
 
