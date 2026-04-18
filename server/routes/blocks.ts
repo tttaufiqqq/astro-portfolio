@@ -1,12 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { requireAuth } from '../middleware/auth';
 import { requireFields, isValidBlockType } from '../lib/validate';
 import { sanitizeBlockContent } from '../lib/sanitize';
 import { serializeBlock } from '../lib/blocks';
 
 const router = Router({ mergeParams: true });
-const prisma = new PrismaClient();
 
 // GET /api/projects/:projectId/blocks
 router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunction) => {

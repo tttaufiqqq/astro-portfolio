@@ -1,11 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { Resend } from 'resend';
 import rateLimit from 'express-rate-limit';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
-const prisma = new PrismaClient();
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const contactLimiter = rateLimit({

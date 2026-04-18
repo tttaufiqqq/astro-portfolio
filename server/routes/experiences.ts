@@ -1,15 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
 import { requireFields } from '../lib/validate';
+import * as experiences from '../services/experiences';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
     try {
-        const experiences = await prisma.experience.findMany({ orderBy: { order: 'asc' } });
-        res.json(experiences);
+        res.json(await experiences.listExperiences());
     } catch (err) {
         next(err);
     }
@@ -22,9 +20,7 @@ router.patch('/reorder', requireAuth, async (req: Request, res: Response, next: 
             res.status(400).json({ error: 'Body must be an array of { id, order }' });
             return;
         }
-        await Promise.all(
-            items.map(item => prisma.experience.update({ where: { id: item.id }, data: { order: item.order } }))
-        );
+        await experiences.reorderExperiences(items);
         res.json({ ok: true });
     } catch (err) {
         next(err);
@@ -47,16 +43,9 @@ router.post('/', requireAuth, async (req: Request, res: Response, next: NextFunc
             return;
         }
 
-        const experience = await prisma.experience.create({
-            data: {
-                company, role, description,
-                startDate: parsedStart,
-                endDate: parsedEnd,
-                current: current ?? false,
-                order: order ?? 0,
-            },
-        });
-        res.status(201).json(experience);
+        res.status(201).json(await experiences.createExperience({
+            company, role, description, startDate: parsedStart, endDate: parsedEnd, current, order,
+        }));
     } catch (err) {
         next(err);
     }
@@ -78,17 +67,9 @@ router.put('/:id', requireAuth, async (req: Request, res: Response, next: NextFu
             return;
         }
 
-        const experience = await prisma.experience.update({
-            where: { id: Number(req.params.id) },
-            data: {
-                company, role, description,
-                startDate: parsedStart,
-                endDate: parsedEnd,
-                current: current ?? false,
-                order,
-            },
-        });
-        res.json(experience);
+        res.json(await experiences.updateExperience(Number(req.params.id), {
+            company, role, description, startDate: parsedStart, endDate: parsedEnd, current, order,
+        }));
     } catch (err) {
         next(err);
     }
@@ -96,7 +77,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response, next: NextFu
 
 router.delete('/:id', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await prisma.experience.delete({ where: { id: Number(req.params.id) } });
+        await experiences.deleteExperience(Number(req.params.id));
         res.status(204).send();
     } catch (err) {
         next(err);

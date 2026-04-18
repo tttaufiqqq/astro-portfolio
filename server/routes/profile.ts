@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { requireAuth } from '../middleware/auth';
 import { deleteFile } from '../lib/storage';
 import { requireFields } from '../lib/validate';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // GET /api/profile — public
 router.get('/', async (_req, res) => {
