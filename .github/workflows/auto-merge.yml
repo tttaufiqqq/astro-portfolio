@@ -29,13 +29,13 @@ jobs:
       - name: Backend tests
         run: |
           cd server
-          npm ci
+          npm install
           npm test
 
       - name: Merge to main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout main
+          git checkout -f main
           git merge origin/improve/roadmap --no-ff -m "Auto-merge: improve/roadmap → main"
           git push origin main
