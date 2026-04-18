@@ -14,13 +14,13 @@ vi.mock('@prisma/client', () => ({
   PrismaClient: function() { return mockPrisma; },
 }));
 
-vi.mock('../lib/blob', () => ({
-  deleteFromBlob: vi.fn().mockResolvedValue(undefined),
-  uploadToBlob: vi.fn(),
+vi.mock('../lib/storage', () => ({
+  deleteFile: vi.fn().mockResolvedValue(undefined),
+  upload: vi.fn(),
 }));
 
 import app from '../app';
-import { deleteFromBlob } from '../lib/blob';
+import { deleteFile } from '../lib/storage';
 
 function authCookie(): string {
   const token = jwt.sign({ admin: true }, 'test-secret', { expiresIn: '1h' });
@@ -98,7 +98,7 @@ describe('PUT /api/profile', () => {
       .put('/api/profile')
       .set('Cookie', authCookie())
       .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', avatarUrl: newAvatarUrl });
-    expect(deleteFromBlob).toHaveBeenCalledWith(sampleProfile.avatarUrl);
+    expect(deleteFile).toHaveBeenCalledWith(sampleProfile.avatarUrl);
   });
 
   it('deletes old resumeUrl from blob when replaced', async () => {
@@ -109,7 +109,7 @@ describe('PUT /api/profile', () => {
       .put('/api/profile')
       .set('Cookie', authCookie())
       .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', resumeUrl: newResumeUrl });
-    expect(deleteFromBlob).toHaveBeenCalledWith(sampleProfile.resumeUrl);
+    expect(deleteFile).toHaveBeenCalledWith(sampleProfile.resumeUrl);
   });
 
   it('does not delete avatarUrl blob when unchanged', async () => {
@@ -119,7 +119,7 @@ describe('PUT /api/profile', () => {
       .put('/api/profile')
       .set('Cookie', authCookie())
       .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', avatarUrl: sampleProfile.avatarUrl });
-    expect(deleteFromBlob).not.toHaveBeenCalled();
+    expect(deleteFile).not.toHaveBeenCalled();
   });
 
   it('does not delete avatarUrl blob when profile has no existing avatar', async () => {
@@ -130,7 +130,7 @@ describe('PUT /api/profile', () => {
       .put('/api/profile')
       .set('Cookie', authCookie())
       .send({ name: 'Muhammad Taufiq', role: 'Software Engineer', bio: 'Bio', avatarUrl: newUrl });
-    expect(deleteFromBlob).not.toHaveBeenCalled();
+    expect(deleteFile).not.toHaveBeenCalled();
   });
 
   it('converts empty string URLs to null', async () => {
@@ -161,7 +161,7 @@ describe('DELETE /api/profile/resume', () => {
       .set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
-    expect(deleteFromBlob).toHaveBeenCalledWith(sampleProfile.resumeUrl);
+    expect(deleteFile).toHaveBeenCalledWith(sampleProfile.resumeUrl);
     expect(mockPrisma.profile.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: { resumeUrl: null } })
     );
@@ -173,7 +173,7 @@ describe('DELETE /api/profile/resume', () => {
       .delete('/api/profile/resume')
       .set('Cookie', authCookie());
     expect(res.status).toBe(200);
-    expect(deleteFromBlob).not.toHaveBeenCalled();
+    expect(deleteFile).not.toHaveBeenCalled();
   });
 });
 
@@ -193,7 +193,7 @@ describe('DELETE /api/profile/avatar', () => {
       .set('Cookie', authCookie());
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
-    expect(deleteFromBlob).toHaveBeenCalledWith(sampleProfile.avatarUrl);
+    expect(deleteFile).toHaveBeenCalledWith(sampleProfile.avatarUrl);
   });
 
   it('returns ok even when no avatar exists', async () => {
@@ -202,6 +202,6 @@ describe('DELETE /api/profile/avatar', () => {
       .delete('/api/profile/avatar')
       .set('Cookie', authCookie());
     expect(res.status).toBe(200);
-    expect(deleteFromBlob).not.toHaveBeenCalled();
+    expect(deleteFile).not.toHaveBeenCalled();
   });
 });

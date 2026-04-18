@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -48,5 +48,11 @@ app.use('/api/messages', messagesRouter);
 app.use('/api/blocks', blockRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/profile', profileRouter);
+
+// Global error handler — catches any error passed to next(err)
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[Error]', err.stack ?? err.message);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 export default app;

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
 import { deleteFile } from '../lib/storage';
+import { requireFields } from '../lib/validate';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -29,6 +30,7 @@ router.get('/', async (_req, res) => {
 // PUT /api/profile — protected
 router.put('/', requireAuth, async (req, res) => {
     try {
+        if (!requireFields(res, req.body, ['name'])) return;
         const { name, role, bio, githubUrl, linkedinUrl, twitterUrl, avatarUrl: avatarUrlBody, resumeUrl: resumeUrlBody } = req.body;
 
         const updateData: Record<string, string | null> = {

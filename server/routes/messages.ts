@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Resend } from 'resend';
 import rateLimit from 'express-rate-limit';
@@ -19,7 +19,8 @@ const contactLimiter = rateLimit({
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Public — contact form
-router.post('/', contactLimiter, async (req: Request, res: Response) => {
+router.post('/', contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  try {
   const { name, email, message } = req.body;
   if (!name || !email || !message) {
     res.status(400).json({ error: 'name, email, and message are required' });
@@ -53,28 +54,43 @@ router.post('/', contactLimiter, async (req: Request, res: Response) => {
   }
 
   res.status(201).json(msg);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Protected — unread count (must be before /:id)
-router.get('/unread-count', requireAuth, async (_req: Request, res: Response) => {
-  const count = await prisma.message.count({ where: { read: false } });
-  res.json({ count });
+router.get('/unread-count', requireAuth, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const count = await prisma.message.count({ where: { read: false } });
+    res.json({ count });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Protected — mark all as read
-router.post('/read-all', requireAuth, async (_req: Request, res: Response) => {
-  await prisma.message.updateMany({ where: { read: false }, data: { read: true } });
-  res.status(204).send();
+router.post('/read-all', requireAuth, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    await prisma.message.updateMany({ where: { read: false }, data: { read: true } });
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Protected — admin only
-router.get('/', requireAuth, async (_req: Request, res: Response) => {
-  const messages = await prisma.message.findMany({ orderBy: { createdAt: 'desc' } });
-  res.json(messages);
+router.get('/', requireAuth, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const messages = await prisma.message.findMany({ orderBy: { createdAt: 'desc' } });
+    res.json(messages);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Protected — reply to a message
-router.post('/:id/reply', requireAuth, async (req: Request, res: Response) => {
+router.post('/:id/reply', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { body } = req.body;
     if (!body) {
@@ -111,14 +127,17 @@ router.post('/:id/reply', requireAuth, async (req: Request, res: Response) => {
     console.log('[Reply] Sent:', data?.id);
     res.status(204).send();
   } catch (err) {
-    console.error('[Reply] Unexpected error:', err);
-    res.status(500).json({ error: 'Failed to send reply' });
+    next(err);
   }
 });
 
-router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
-  await prisma.message.delete({ where: { id: Number(req.params.id) } });
-  res.status(204).send();
+router.delete('/:id', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await prisma.message.delete({ where: { id: Number(req.params.id) } });
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;
