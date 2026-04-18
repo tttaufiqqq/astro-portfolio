@@ -4,6 +4,7 @@ import { requireAuth } from '../middleware/auth';
 import { deleteFile } from '../lib/storage';
 import { requireFields, isValidBlockType } from '../lib/validate';
 import { sanitizeBlockContent } from '../lib/sanitize';
+import { serializeBlock } from '../lib/blocks';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -35,7 +36,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response, next: NextFu
                 imageUrl,
             },
         });
-        res.json(block);
+        res.json(serializeBlock(block));
     } catch (err) {
         next(err);
     }

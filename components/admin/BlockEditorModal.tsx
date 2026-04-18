@@ -29,7 +29,7 @@ interface AdminBlock {
     projectId: number;
     type: BlockType;
     order: number;
-    content: string;    // raw JSON string from DB
+    content: Record<string, unknown>;
     language: string | null;
     imageUrl: string | null;
 }
@@ -52,12 +52,8 @@ interface Props {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function safeParse(raw: string): Record<string, unknown> {
-    try { return JSON.parse(raw); } catch { return {}; }
-}
-
 function blockToForm(block: AdminBlock): AnyForm {
-    const c = safeParse(block.content);
+    const c = block.content;
     switch (block.type) {
         case 'heading': return { text: String(c.text ?? ''), level: String(c.level ?? '2') as '2' | '3' };
         case 'text':    return { html: String(c.html ?? '') };
@@ -103,7 +99,7 @@ function emptyForm(type: BlockType): AnyForm {
 }
 
 function contentPreview(block: AdminBlock): string {
-    const c = safeParse(block.content);
+    const c = block.content;
     switch (block.type) {
         case 'heading': return `H${c.level ?? 2}: ${c.text ?? ''}`;
         case 'text':    return String(c.html ?? '').replace(/<[^>]+>/g, '').slice(0, 80) || '(empty)';

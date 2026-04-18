@@ -43,7 +43,7 @@ router.post('/', requireAuth, async (req: Request, res: Response, next: NextFunc
                 imageUrl,
             },
         });
-        res.status(201).json(block);
+        res.status(201).json(serializeBlock(block));
     } catch (err) {
         next(err);
     }
