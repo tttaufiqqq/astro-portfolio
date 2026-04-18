@@ -52,7 +52,7 @@ export default function Home() {
 
     function setContactField(key: keyof typeof contactForm, value: string) {
         setContactForm(f => ({ ...f, [key]: value }));
-        if (key in contactErrors) setContactErrors(e => ({ ...e, [key]: undefined }));
+        if (key in contactErrors) setContactErrors(e => { const next = { ...e }; delete next[key]; return next; });
     }
 
     async function submitContact(e: React.FormEvent) {
