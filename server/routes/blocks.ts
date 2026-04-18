@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
 import { requireFields, isValidBlockType } from '../lib/validate';
+import { sanitizeBlockContent } from '../lib/sanitize';
 
 const router = Router({ mergeParams: true });
 const prisma = new PrismaClient();
@@ -30,12 +31,13 @@ router.post('/', requireAuth, async (req: Request, res: Response, next: NextFunc
             return;
         }
 
+        const rawContent = typeof content === 'string' ? content : JSON.stringify(content);
         const block = await prisma.contentBlock.create({
             data: {
                 projectId: Number(req.params.projectId),
                 type,
                 order: order ?? 0,
-                content: typeof content === 'string' ? content : JSON.stringify(content),
+                content: sanitizeBlockContent(type, rawContent),
                 language,
                 imageUrl,
             },

@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
 import { deleteFile } from '../lib/storage';
 import { requireFields, isValidBlockType } from '../lib/validate';
+import { sanitizeBlockContent } from '../lib/sanitize';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -23,12 +24,13 @@ router.put('/:id', requireAuth, async (req: Request, res: Response, next: NextFu
             await deleteFile(existing.imageUrl);
         }
 
+        const rawContent = typeof content === 'string' ? content : JSON.stringify(content);
         const block = await prisma.contentBlock.update({
             where: { id: Number(req.params.id) },
             data: {
                 type,
                 order,
-                content: typeof content === 'string' ? content : JSON.stringify(content),
+                content: sanitizeBlockContent(type, rawContent),
                 language,
                 imageUrl,
             },
