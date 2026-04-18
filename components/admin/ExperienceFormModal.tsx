@@ -30,6 +30,20 @@ const empty: FormState = {
     startDate: '', endDate: '', current: false, order: '0',
 };
 
+interface FormErrors {
+    company?: string;
+    role?: string;
+    startDate?: string;
+}
+
+function validate(form: FormState): FormErrors {
+    const e: FormErrors = {};
+    if (!form.company.trim()) e.company = 'Company is required';
+    if (!form.role.trim()) e.role = 'Role is required';
+    if (!form.startDate) e.startDate = 'Start date is required';
+    return e;
+}
+
 /** Convert ISO date string or null to YYYY-MM-DD for <input type="date"> */
 function toDateInput(val: string | null | undefined): string {
     if (!val) return '';
@@ -38,9 +52,11 @@ function toDateInput(val: string | null | undefined): string {
 
 export default function ExperienceFormModal({ open, onClose, onSaved, experience }: Props) {
     const [form, setForm] = useState<FormState>(empty);
+    const [errors, setErrors] = useState<FormErrors>({});
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
+        setErrors({});
         if (experience) {
             setForm({
                 company: experience.company,
@@ -58,10 +74,13 @@ export default function ExperienceFormModal({ open, onClose, onSaved, experience
 
     function set(key: keyof FormState, value: string | boolean) {
         setForm(f => ({ ...f, [key]: value }));
+        if (key in errors) setErrors(e => ({ ...e, [key]: undefined }));
     }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        const errs = validate(form);
+        if (Object.keys(errs).length > 0) { setErrors(errs); return; }
         setSaving(true);
         const body = {
             ...form,
@@ -92,13 +111,13 @@ export default function ExperienceFormModal({ open, onClose, onSaved, experience
 
     return (
         <ModalShell open={open} onClose={onClose} title={experience ? 'Edit Experience' : 'New Experience'}>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField label="Company" required>
-                        <ThemedInput value={form.company} onChange={e => set('company', e.target.value)} required />
+                    <FormField label="Company" required error={errors.company}>
+                        <ThemedInput value={form.company} onChange={e => set('company', e.target.value)} error={errors.company} />
                     </FormField>
-                    <FormField label="Role" required>
-                        <ThemedInput value={form.role} onChange={e => set('role', e.target.value)} required />
+                    <FormField label="Role" required error={errors.role}>
+                        <ThemedInput value={form.role} onChange={e => set('role', e.target.value)} error={errors.role} />
                     </FormField>
                 </div>
 
@@ -107,8 +126,8 @@ export default function ExperienceFormModal({ open, onClose, onSaved, experience
                 </FormField>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField label="Start Date" required>
-                        <ThemedInput type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} required />
+                    <FormField label="Start Date" required error={errors.startDate}>
+                        <ThemedInput type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} error={errors.startDate} />
                     </FormField>
                     {!form.current && (
                         <FormField label="End Date">

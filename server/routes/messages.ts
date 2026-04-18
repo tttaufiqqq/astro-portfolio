@@ -5,13 +5,15 @@ import * as messages from '../services/messages';
 
 const router = Router();
 
-const contactLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000,
-    max: 5,
-    message: { error: 'Too many messages sent. Please try again later.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
+const contactLimiter = process.env.NODE_ENV === 'test'
+    ? (_req: Request, _res: Response, next: NextFunction) => next()
+    : rateLimit({
+        windowMs: 60 * 60 * 1000,
+        max: 5,
+        message: { error: 'Too many messages sent. Please try again later.' },
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
