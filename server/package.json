@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.31.0",
