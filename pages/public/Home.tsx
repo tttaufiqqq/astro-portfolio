@@ -201,13 +201,13 @@ export default function Home() {
                                 {contactErrors.message && <p className="text-xs text-red-400">{contactErrors.message}</p>}
                             </div>
                             {contactState === 'error' && <p className="text-sm text-red-400">Something went wrong. Please try again.</p>}
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                                 <button type="submit" disabled={contactState === 'sending'}
-                                    className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent">
+                                    className="inline-flex items-center justify-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent w-full sm:w-auto">
                                     <Send size={15} />
                                     {contactState === 'sending' ? 'Sending…' : 'Send Message'}
                                 </button>
-                                <Link to="/contact" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">
+                                <Link to="/contact" className="text-sm text-slate-500 hover:text-slate-300 transition-colors text-center sm:text-left">
                                     Open full contact page →
                                 </Link>
                             </div>

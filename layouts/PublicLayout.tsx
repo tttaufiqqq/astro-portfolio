@@ -38,7 +38,7 @@ export default function PublicLayout() {
                         className="text-cyan-accent font-mono font-bold text-xl"
                     >
                         <Link to="/" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent rounded">
-                            &lt;tttaufiqqq /&gt;
+                            &lt;taufiq /&gt;
                         </Link>
                     </motion.div>
 
@@ -130,7 +130,7 @@ export default function PublicLayout() {
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
                     <div className="text-center md:text-left">
                         <div className="text-cyan-accent font-mono font-bold text-xl mb-2">
-                            &lt;tttaufiqqq /&gt;
+                            &lt;taufiq /&gt;
                         </div>
                         <p className="text-slate-400 text-sm">
                             Building the future, one line of code at a time.
@@ -163,7 +163,7 @@ export default function PublicLayout() {
                 </div>
 
                 <div className="text-center mt-8 md:mt-12 text-slate-500 text-xs">
-                    &copy; {new Date().getFullYear()} tttaufiqqq. All rights reserved.
+                    &copy; {new Date().getFullYear()} Taufiq Arifin. All rights reserved.
                 </div>
             </footer>
         </div>
