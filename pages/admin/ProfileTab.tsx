@@ -189,7 +189,7 @@ export default function ProfileTab() {
             )}
 
             <form id="profile-form" onSubmit={handleSave}>
-                <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex flex-col lg:flex-row lg:items-stretch gap-8">
 
                     {/* Left sidebar — avatar, resume, social */}
                     <div className="lg:w-72 shrink-0 space-y-6">
@@ -288,8 +288,8 @@ export default function ProfileTab() {
                     </div>
 
                     {/* Right main — identity + bio + save */}
-                    <div className="flex-1 space-y-6">
-                        <div className="bg-oxford-blue border border-yinmn-blue/30 rounded-2xl p-6 space-y-6">
+                    <div className="flex-1 flex flex-col gap-6">
+                        <div className="flex-1 bg-oxford-blue border border-yinmn-blue/30 rounded-2xl p-6 flex flex-col gap-6">
                             <p className="text-sm font-medium text-slate-300">Identity</p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -303,16 +303,15 @@ export default function ProfileTab() {
 
                             <hr className="border-yinmn-blue/20" />
 
-                            <div className="space-y-1">
-                                <FormField label="Bio">
-                                    <ThemedTextarea
-                                        value={form.bio}
-                                        onChange={e => set('bio', e.target.value)}
-                                        rows={8}
-                                        placeholder="Tell visitors about yourself…"
-                                        maxLength={BIO_MAX}
-                                    />
-                                </FormField>
+                            <div className="flex-1 flex flex-col gap-1 min-h-0">
+                                <label className="block text-sm font-medium text-slate-300">Bio</label>
+                                <ThemedTextarea
+                                    className="flex-1 min-h-40"
+                                    value={form.bio}
+                                    onChange={e => set('bio', e.target.value)}
+                                    placeholder="Tell visitors about yourself…"
+                                    maxLength={BIO_MAX}
+                                />
                                 <p
                                     data-testid="bio-char-count"
                                     className={`text-xs text-right ${form.bio.length >= BIO_MAX ? 'text-red-400' : 'text-slate-600'}`}
