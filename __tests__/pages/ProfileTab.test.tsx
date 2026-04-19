@@ -188,22 +188,22 @@ describe('ProfileTab — bio character count', () => {
     stubFetch({ ...baseProfile, bio: 'IT undergrad at UTeM' });
     render(<ProfileTab />);
     await waitFor(() => expect(screen.getByTestId('bio-char-count')).toBeInTheDocument());
-    expect(screen.getByTestId('bio-char-count')).toHaveTextContent('20 / 500');
+    expect(screen.getByTestId('bio-char-count')).toHaveTextContent('20 / 1000');
   });
 
   it('updates character count as user types', async () => {
     stubFetch({ ...baseProfile, bio: '' });
     render(<ProfileTab />);
-    await waitFor(() => expect(screen.getByTestId('bio-char-count')).toHaveTextContent('0 / 500'));
+    await waitFor(() => expect(screen.getByTestId('bio-char-count')).toHaveTextContent('0 / 1000'));
     fireEvent.change(screen.getByPlaceholderText(/tell visitors/i), { target: { value: 'Hello' } });
-    expect(screen.getByTestId('bio-char-count')).toHaveTextContent('5 / 500');
+    expect(screen.getByTestId('bio-char-count')).toHaveTextContent('5 / 1000');
   });
 
   it('shows count in red when at max length', async () => {
-    const longBio = 'a'.repeat(500);
+    const longBio = 'a'.repeat(1000);
     stubFetch({ ...baseProfile, bio: longBio });
     render(<ProfileTab />);
-    await waitFor(() => expect(screen.getByTestId('bio-char-count')).toHaveTextContent('500 / 500'));
+    await waitFor(() => expect(screen.getByTestId('bio-char-count')).toHaveTextContent('1000 / 1000'));
     expect(screen.getByTestId('bio-char-count')).toHaveClass('text-red-400');
   });
 });
