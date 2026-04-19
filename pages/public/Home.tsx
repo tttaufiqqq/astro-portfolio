@@ -124,7 +124,7 @@ export default function Home() {
                         </p>
                         {profile?.resumeUrl && (
                             <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent">
+                                className="flex sm:inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-cyan-accent text-space-cadet px-6 py-2.5 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent">
                                 <Download size={16} /> Download CV
                             </a>
                         )}

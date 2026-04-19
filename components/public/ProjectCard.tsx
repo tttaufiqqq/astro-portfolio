@@ -34,7 +34,7 @@ export default function ProjectCard({ project }: Props) {
                     <img
                         src={project.imageUrl}
                         alt={project.title}
-                        className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                        className="w-full h-full object-cover object-top group-hover:opacity-90 transition-opacity"
                         loading="lazy"
                     />
                 </div>

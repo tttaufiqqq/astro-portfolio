@@ -71,8 +71,8 @@ export default function ProjectDetail() {
             <div className="relative h-72 md:h-[28rem] overflow-hidden">
                 {project.imageUrl ? (
                     <>
-                        <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-space-cadet via-space-cadet/60 to-space-cadet/10" />
+                        <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover object-top scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-space-cadet via-space-cadet/75 to-space-cadet/30" />
                     </>
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-oxford-blue via-yinmn-blue/40 to-space-cadet" />
