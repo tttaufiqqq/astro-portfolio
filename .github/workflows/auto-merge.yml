@@ -2,7 +2,9 @@ name: Auto-merge to main
 
 on:
   push:
-    branches: [improve/roadmap]
+    branches:
+      - 'feature/*'
+      - 'improve/*'
 
 jobs:
   test-and-merge:
@@ -37,5 +39,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -f main
-          git merge origin/improve/roadmap --no-ff -m "Auto-merge: improve/roadmap → main"
+          git merge origin/${{ github.ref_name }} --no-ff -m "Auto-merge: ${{ github.ref_name }} → main"
           git push origin main
