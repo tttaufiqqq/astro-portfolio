@@ -90,12 +90,7 @@ export default function Home() {
                     {profile?.role ?? 'Software Engineer & Full-Stack Developer'}
                 </motion.h1>
 
-                <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                    className="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed whitespace-pre-line">
-                    {profile?.bio ?? 'I build high-quality web applications with modern technologies, turning complex ideas into clean, documented, and scalable software.'}
-                </motion.p>
-
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                     className="flex flex-col sm:flex-row justify-center gap-3 w-full sm:w-auto">
                     <Link to="/projects" className="w-full sm:w-auto text-center bg-cyan-accent text-space-cadet px-8 py-3 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
                         View Projects
