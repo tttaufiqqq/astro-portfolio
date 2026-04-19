@@ -33,8 +33,6 @@ jobs:
           cd server
           npm install
           npm test
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Merge to main
         run: |
