@@ -19,7 +19,7 @@ interface FormState {
 }
 
 const empty: FormState = { name: '', role: '', bio: '', githubUrl: '', linkedinUrl: '', twitterUrl: '' };
-const BIO_MAX = 500;
+const BIO_MAX = 1000;
 
 export default function ProfileTab() {
     const [form, setForm] = useState<FormState>(empty);

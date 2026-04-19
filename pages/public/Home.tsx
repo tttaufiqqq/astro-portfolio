@@ -91,7 +91,7 @@ export default function Home() {
                 </motion.h1>
 
                 <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                    className="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed">
+                    className="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed whitespace-pre-line">
                     {profile?.bio ?? 'I build high-quality web applications with modern technologies, turning complex ideas into clean, documented, and scalable software.'}
                 </motion.p>
 
@@ -119,7 +119,7 @@ export default function Home() {
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-6">
                         <h2 className="text-3xl font-bold border-b-2 border-cyan-accent pb-2 inline-block">About Me</h2>
-                        <p className="text-slate-400 leading-relaxed text-lg">
+                        <p className="text-slate-400 leading-relaxed text-lg whitespace-pre-line">
                             {profile?.bio ?? 'IT undergrad at UTeM, building full-stack web and IoT solutions. Passionate about clean code, scalable architecture, and shipping things that work.'}
                         </p>
                         {profile?.resumeUrl && (
