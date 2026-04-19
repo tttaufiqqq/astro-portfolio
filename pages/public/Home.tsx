@@ -79,7 +79,7 @@ export default function Home() {
     return (
         <>
             {/* Hero */}
-            <header className="pt-24 pb-14 md:pt-32 md:pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
+            <header className="pt-24 pb-6 md:pt-32 md:pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
                     className="mb-6 inline-block px-4 py-1.5 rounded-full border border-cyan-accent/30 bg-cyan-accent/5 text-cyan-accent text-xs font-mono uppercase tracking-widest">
                     Available for new opportunities
@@ -90,12 +90,7 @@ export default function Home() {
                     {profile?.role ?? 'Software Engineer & Full-Stack Developer'}
                 </motion.h1>
 
-                <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                    className="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed">
-                    {profile?.bio ?? 'I build high-quality web applications with modern technologies, turning complex ideas into clean, documented, and scalable software.'}
-                </motion.p>
-
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                     className="flex flex-col sm:flex-row justify-center gap-3 w-full sm:w-auto">
                     <Link to="/projects" className="w-full sm:w-auto text-center bg-cyan-accent text-space-cadet px-8 py-3 rounded-lg font-bold hover:bg-white transition-colors shadow-lg shadow-cyan-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-accent focus-visible:ring-offset-2 focus-visible:ring-offset-space-cadet">
                         View Projects
@@ -119,7 +114,7 @@ export default function Home() {
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-6">
                         <h2 className="text-3xl font-bold border-b-2 border-cyan-accent pb-2 inline-block">About Me</h2>
-                        <p className="text-slate-400 leading-relaxed text-lg">
+                        <p className="text-slate-400 leading-relaxed text-lg whitespace-pre-line">
                             {profile?.bio ?? 'IT undergrad at UTeM, building full-stack web and IoT solutions. Passionate about clean code, scalable architecture, and shipping things that work.'}
                         </p>
                         {profile?.resumeUrl && (
