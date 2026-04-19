@@ -79,7 +79,7 @@ export default function Home() {
     return (
         <>
             {/* Hero */}
-            <header className="pt-24 pb-14 md:pt-32 md:pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
+            <header className="pt-24 pb-6 md:pt-32 md:pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
                     className="mb-6 inline-block px-4 py-1.5 rounded-full border border-cyan-accent/30 bg-cyan-accent/5 text-cyan-accent text-xs font-mono uppercase tracking-widest">
                     Available for new opportunities
