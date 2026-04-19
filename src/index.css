@@ -8,13 +8,13 @@
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-    /* Portfolio palette */
-    --color-space-cadet: #0b132b;
-    --color-oxford-blue:  #1c2541;
-    --color-yinmn-blue:   #3a506b;
-    --color-cyan-accent:  #6fffe9;
+    /* Portfolio palette — reference runtime CSS vars so themes swap at runtime */
+    --color-space-cadet: var(--space-cadet);
+    --color-oxford-blue: var(--oxford-blue);
+    --color-yinmn-blue:  var(--yinmn-blue);
+    --color-cyan-accent: var(--cyan-accent);
 
-    /* Semantic tokens — always dark theme */
+    /* Semantic tokens */
     --color-background:           var(--background);
     --color-foreground:           var(--foreground);
     --color-card:                 var(--card);
@@ -47,26 +47,66 @@
     }
 }
 
+/* ── Default theme: Navy Cyan ─────────────────────────────────────────── */
 :root {
-    --background:          #0b132b;
+    /* Raw palette */
+    --space-cadet: #0b132b;
+    --oxford-blue: #1c2541;
+    --yinmn-blue:  #3a506b;
+    --cyan-accent: #6fffe9;
+
+    /* Semantic — reference palette */
+    --background:          var(--space-cadet);
     --foreground:          #e2e8f0;
-    --card:                #1c2541;
+    --card:                var(--oxford-blue);
     --card-foreground:     #e2e8f0;
-    --popover:             #1c2541;
+    --popover:             var(--oxford-blue);
     --popover-foreground:  #e2e8f0;
-    --primary:             #6fffe9;
-    --primary-foreground:  #0b132b;
-    --secondary:           #3a506b;
+    --primary:             var(--cyan-accent);
+    --primary-foreground:  var(--space-cadet);
+    --secondary:           var(--yinmn-blue);
     --secondary-foreground:#e2e8f0;
-    --muted:               #3a506b;
+    --muted:               var(--yinmn-blue);
     --muted-foreground:    #94a3b8;
-    --accent:              #3a506b;
-    --accent-foreground:   #6fffe9;
+    --accent:              var(--yinmn-blue);
+    --accent-foreground:   var(--cyan-accent);
     --destructive:         #ef4444;
-    --border:              color-mix(in srgb, #3a506b 60%, transparent);
-    --input:               color-mix(in srgb, #3a506b 40%, transparent);
-    --ring:                #6fffe9;
+    --border:              color-mix(in srgb, var(--yinmn-blue) 60%, transparent);
+    --input:               color-mix(in srgb, var(--yinmn-blue) 40%, transparent);
+    --ring:                var(--cyan-accent);
     --radius:              0.5rem;
+}
+
+/* ── Theme: Slate Lime ────────────────────────────────────────────────── */
+[data-theme="slate-lime"] {
+    --space-cadet: #020617;
+    --oxford-blue: #0f172a;
+    --yinmn-blue:  #1e293b;
+    --cyan-accent: #bef264;
+}
+
+/* ── Theme: Coral Glow ────────────────────────────────────────────────── */
+[data-theme="coral-glow"] {
+    --space-cadet: #1c1410;
+    --oxford-blue: #2a1e18;
+    --yinmn-blue:  #3d2d24;
+    --cyan-accent: #f4845f;
+}
+
+/* ── Theme: Dusk Lavender ─────────────────────────────────────────────── */
+[data-theme="dusk-lavender"] {
+    --space-cadet: #16121e;
+    --oxford-blue: #1e1829;
+    --yinmn-blue:  #2c2440;
+    --cyan-accent: #b6a6ca;
+}
+
+/* ── Theme: Steel Mist ────────────────────────────────────────────────── */
+[data-theme="steel-mist"] {
+    --space-cadet: #0d1618;
+    --oxford-blue: #162022;
+    --yinmn-blue:  #243538;
+    --cyan-accent: #a5ccd1;
 }
 
 @layer base {
@@ -75,13 +115,14 @@
     }
     body {
         @apply bg-background text-foreground font-sans antialiased;
+        transition: background-color 0.25s ease, color 0.15s ease;
     }
     h1, h2, h3, h4, h5, h6 {
         @apply text-white font-bold tracking-tight;
     }
     ::selection {
-        background-color: #6fffe9;
-        color: #0b132b;
+        background-color: var(--cyan-accent);
+        color: var(--space-cadet);
     }
 
     /* Custom scrollbar */
@@ -90,13 +131,13 @@
         height: 6px;
     }
     ::-webkit-scrollbar-track {
-        background: #0b132b;
+        background: var(--space-cadet);
     }
     ::-webkit-scrollbar-thumb {
-        background: #3a506b;
+        background: var(--yinmn-blue);
         border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-        background: #6fffe9;
+        background: var(--cyan-accent);
     }
 }
