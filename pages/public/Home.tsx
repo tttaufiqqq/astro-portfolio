@@ -154,12 +154,23 @@ export default function Home() {
                 </Section>
             )}
 
+            {/* Education */}
+            {experiences.filter(e => e.type === 'education').length > 0 && (
+                <Section title="Education" id="education">
+                    <div className="max-w-3xl">
+                        {experiences.filter(e => e.type === 'education').map((exp, i, arr) => (
+                            <TimelineItem key={exp.id} experience={exp} isLast={i === arr.length - 1} />
+                        ))}
+                    </div>
+                </Section>
+            )}
+
             {/* Experience */}
-            {experiences.length > 0 && (
+            {experiences.filter(e => e.type === 'work' || !e.type).length > 0 && (
                 <Section title="Professional Journey" id="experience">
                     <div className="max-w-3xl">
-                        {experiences.map((exp, i) => (
-                            <TimelineItem key={exp.id} experience={exp} isLast={i === experiences.length - 1} />
+                        {experiences.filter(e => e.type === 'work' || !e.type).map((exp, i, arr) => (
+                            <TimelineItem key={exp.id} experience={exp} isLast={i === arr.length - 1} />
                         ))}
                     </div>
                 </Section>

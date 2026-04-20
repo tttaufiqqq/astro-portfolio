@@ -11,6 +11,7 @@ interface ExperienceData {
     endDate: Date | null;
     description: string;
     current?: boolean;
+    type?: string;
     order?: number;
 }
 

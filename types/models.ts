@@ -78,6 +78,7 @@ export interface Experience {
     startDate: string;
     endDate: string | null;
     current: boolean;
+    type: 'work' | 'education';
     order: number;
     createdAt: string;
     updatedAt: string;

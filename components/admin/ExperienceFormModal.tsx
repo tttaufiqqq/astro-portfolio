@@ -7,6 +7,9 @@ import FormField from './FormField';
 import ThemedInput from './ThemedInput';
 import ThemedTextarea from './ThemedTextarea';
 import ThemedButton from './ThemedButton';
+import ThemedSelect from './ThemedSelect';
+import ThemedCheckbox from './ThemedCheckbox';
+import ThemedNumberInput from './ThemedNumberInput';
 
 interface Props {
     open: boolean;
@@ -22,12 +25,13 @@ interface FormState {
     startDate: string;
     endDate: string;
     current: boolean;
+    type: 'work' | 'education';
     order: string;
 }
 
 const empty: FormState = {
     company: '', role: '', description: '',
-    startDate: '', endDate: '', current: false, order: '0',
+    startDate: '', endDate: '', current: false, type: 'work', order: '0',
 };
 
 interface FormErrors {
@@ -65,6 +69,7 @@ export default function ExperienceFormModal({ open, onClose, onSaved, experience
                 startDate: toDateInput(experience.startDate),
                 endDate: toDateInput(experience.endDate),
                 current: experience.current,
+                type: experience.type ?? 'work',
                 order: String(experience.order),
             });
         } else {
@@ -87,6 +92,7 @@ export default function ExperienceFormModal({ open, onClose, onSaved, experience
             order: parseInt(form.order, 10) || 0,
             endDate: form.current ? null : (form.endDate || null),
             startDate: form.startDate,
+            type: form.type,
         };
         try {
             const url = experience ? `/api/experiences/${experience.id}` : '/api/experiences';
@@ -112,11 +118,21 @@ export default function ExperienceFormModal({ open, onClose, onSaved, experience
     return (
         <ModalShell open={open} onClose={onClose} title={experience ? 'Edit Experience' : 'New Experience'}>
             <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
+                <FormField label="Type">
+                    <ThemedSelect
+                        value={form.type}
+                        onChange={v => set('type', v as 'work' | 'education')}
+                        options={[
+                            { value: 'work', label: 'Work / Project' },
+                            { value: 'education', label: 'Education' },
+                        ]}
+                    />
+                </FormField>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField label="Company" required error={errors.company}>
+                    <FormField label={form.type === 'education' ? 'Institution' : 'Company'} required error={errors.company}>
                         <ThemedInput value={form.company} onChange={e => set('company', e.target.value)} error={errors.company} />
                     </FormField>
-                    <FormField label="Role" required error={errors.role}>
+                    <FormField label={form.type === 'education' ? 'Degree / Qualification' : 'Role'} required error={errors.role}>
                         <ThemedInput value={form.role} onChange={e => set('role', e.target.value)} error={errors.role} />
                     </FormField>
                 </div>
@@ -136,18 +152,12 @@ export default function ExperienceFormModal({ open, onClose, onSaved, experience
                     )}
                 </div>
 
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={form.current}
-                        onChange={e => set('current', e.target.checked)}
-                        className="w-4 h-4 accent-cyan-500 rounded"
-                    />
-                    <span className="text-sm text-slate-300">Currently working here</span>
-                </label>
+                <ThemedCheckbox checked={form.current} onChange={v => set('current', v)}>
+                    {form.type === 'education' ? 'Currently studying here' : 'Currently working here'}
+                </ThemedCheckbox>
 
                 <FormField label="Order">
-                    <ThemedInput type="number" value={form.order} onChange={e => set('order', e.target.value)} />
+                    <ThemedNumberInput value={form.order} onChange={v => set('order', v)} min={0} />
                 </FormField>
 
                 <div className="flex justify-end gap-3 pt-2">
