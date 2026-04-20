@@ -30,7 +30,7 @@ router.patch('/reorder', requireAuth, async (req: Request, res: Response, next: 
 router.post('/', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!requireFields(res, req.body, ['company', 'role', 'startDate'])) return;
-        const { company, role, startDate, endDate, description, current, order } = req.body;
+        const { company, role, startDate, endDate, description, current, type, order } = req.body;
 
         const parsedStart = new Date(startDate);
         if (isNaN(parsedStart.getTime())) {
@@ -44,7 +44,7 @@ router.post('/', requireAuth, async (req: Request, res: Response, next: NextFunc
         }
 
         res.status(201).json(await experiences.createExperience({
-            company, role, description, startDate: parsedStart, endDate: parsedEnd, current, order,
+            company, role, description, startDate: parsedStart, endDate: parsedEnd, current, type, order,
         }));
     } catch (err) {
         next(err);
@@ -54,7 +54,7 @@ router.post('/', requireAuth, async (req: Request, res: Response, next: NextFunc
 router.put('/:id', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!requireFields(res, req.body, ['company', 'role', 'startDate'])) return;
-        const { company, role, startDate, endDate, description, current, order } = req.body;
+        const { company, role, startDate, endDate, description, current, type, order } = req.body;
 
         const parsedStart = new Date(startDate);
         if (isNaN(parsedStart.getTime())) {
@@ -68,7 +68,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response, next: NextFu
         }
 
         res.json(await experiences.updateExperience(Number(req.params.id), {
-            company, role, description, startDate: parsedStart, endDate: parsedEnd, current, order,
+            company, role, description, startDate: parsedStart, endDate: parsedEnd, current, type, order,
         }));
     } catch (err) {
         next(err);

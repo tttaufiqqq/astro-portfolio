@@ -8,6 +8,7 @@ import ThemedInput from './ThemedInput';
 import ThemedButton from './ThemedButton';
 import IconPicker from './IconPicker';
 import ThemedSelect from './ThemedSelect';
+import ThemedNumberInput from './ThemedNumberInput';
 
 const SKILL_CATEGORIES = [
     { value: 'Frontend',  label: 'Frontend'  },
@@ -116,7 +117,7 @@ export default function SkillFormModal({ open, onClose, onSaved, skill }: Props)
                 </FormField>
 
                 <FormField label="Order">
-                    <ThemedInput type="number" value={form.order} onChange={e => set('order', e.target.value)} />
+                    <ThemedNumberInput value={form.order} onChange={v => set('order', v)} min={0} />
                 </FormField>
 
                 <div className="flex justify-end gap-3 pt-2">

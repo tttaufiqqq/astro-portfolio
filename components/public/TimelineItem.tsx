@@ -1,4 +1,4 @@
-import { Globe } from 'lucide-react';
+import { Globe, GraduationCap } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Experience } from '@/types/models';
 
@@ -53,7 +53,7 @@ export default function TimelineItem({ experience, isLast }: Props) {
 
             <div className="flex flex-wrap gap-4 mb-4 text-sm text-slate-400">
                 <div className="flex items-center gap-1">
-                    <Globe size={14} />
+                    {experience.type === 'education' ? <GraduationCap size={14} /> : <Globe size={14} />}
                     {experience.company}
                 </div>
             </div>

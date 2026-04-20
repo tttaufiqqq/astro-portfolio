@@ -8,6 +8,7 @@ import ThemedInput from './ThemedInput';
 import ThemedTextarea from './ThemedTextarea';
 import ThemedButton from './ThemedButton';
 import ThemedSelect from './ThemedSelect';
+import ThemedNumberInput from './ThemedNumberInput';
 
 interface Props {
     open: boolean;
@@ -149,7 +150,7 @@ export default function ProjectFormModal({ open, onClose, onSaved, project }: Pr
                         <ThemedInput value={form.title} onChange={e => set('title', e.target.value)} error={errors.title} />
                     </FormField>
                     <FormField label="Order" hint="Position in the list">
-                        <ThemedInput type="number" min="0" value={form.order} onChange={e => set('order', e.target.value)} onKeyDown={e => e.preventDefault()} />
+                        <ThemedNumberInput value={form.order} onChange={v => set('order', v)} min={0} />
                     </FormField>
                 </div>
 

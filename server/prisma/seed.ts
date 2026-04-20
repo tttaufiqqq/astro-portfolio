@@ -173,6 +173,7 @@ async function main() {
                 startDate: new Date('2025-09-01'),
                 description: 'Designing and building a full IoT + ML beehive monitoring system. Covers hardware assembly, backend API, real-time dashboards, and machine learning pipeline.',
                 current: true,
+                type: 'work',
                 order: 1,
             },
             {
@@ -182,6 +183,7 @@ async function main() {
                 endDate: new Date('2025-04-01'),
                 description: 'Built a dynamic developer portfolio with a custom block-based CMS, Azure deployment, and full CI/CD pipeline via GitHub Actions.',
                 current: false,
+                type: 'work',
                 order: 2,
             },
         ],

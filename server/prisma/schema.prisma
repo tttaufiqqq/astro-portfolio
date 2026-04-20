@@ -62,6 +62,7 @@ model Experience {
   endDate     DateTime?
   description String    @db.NVarChar(Max)
   current     Boolean   @default(false)
+  type        String    @default("work") @db.NVarChar(20)
   order       Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
