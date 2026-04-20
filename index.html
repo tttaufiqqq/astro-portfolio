@@ -24,12 +24,7 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      (function () {
-        var t = localStorage.getItem('admin-theme');
-        if (t && t !== 'navy-cyan') document.documentElement.dataset.theme = t;
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
